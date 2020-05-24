@@ -8,20 +8,6 @@ struct VulkanBuffer {
     VkBufferView view;
 };
 
-void createVulkanBuffer(
-    VkDevice,
-    uint32_t,
-    VkBufferUsageFlags,
-    uint32_t,
-    VulkanBuffer&
-);
-
-void allocateVulkanBuffer(
-    VkDevice,
-    VkPhysicalDeviceMemoryProperties,
-    VulkanBuffer&
-);
-
 void createUniformBuffer(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
@@ -39,6 +25,14 @@ void createVertexBuffer(
 );
 
 void createIndexBuffer(
+    VkDevice device,
+    VkPhysicalDeviceMemoryProperties& memories,
+    uint32_t queueFamily,
+    uint32_t size,
+    VulkanBuffer& buffer
+);
+
+void createStagingBuffer(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
     uint32_t queueFamily,

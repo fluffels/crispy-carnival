@@ -15,7 +15,7 @@ void createDescriptorLayout(Vulkan& vk) {
     
     binding = {};
     binding.binding = 1;
-    binding.descriptorCount = 6;
+    binding.descriptorCount = 1;
     binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
     bindings.push_back(binding);

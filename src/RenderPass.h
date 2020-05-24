@@ -11,7 +11,7 @@ struct RenderPass {
     VulkanBuffer vBuff;
     VulkanBuffer iBuff;
     uint32_t idxCount;
-    vector<VulkanSampler> samplers;
+    VulkanSampler skybox;
 };
 
 void initRenderPass(Vulkan&, RenderPass&);

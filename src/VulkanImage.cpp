@@ -34,22 +34,25 @@ VkDeviceMemory allocate(
 
 VkImage createImage(
     VkDevice device,
+    VkImageType type,
     VkExtent2D extent,
+    uint32_t layerCount,
     uint32_t family,
     VkFormat format,
-    VkImageTiling tiling,
-    VkImageUsageFlags usage
+    VkImageUsageFlags usage,
+    VkImageCreateFlags flags
 ) {
     VkImage result;
 
     VkImageCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+    createInfo.flags = flags;
     createInfo.imageType = VK_IMAGE_TYPE_2D;
     createInfo.extent = { extent.width, extent.height, 1 };
     createInfo.mipLevels = 1;
-    createInfo.arrayLayers = 1;
+    createInfo.arrayLayers = layerCount;
     createInfo.format = format;
-    createInfo.tiling = tiling;
+    createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     createInfo.queueFamilyIndexCount = 1;
     createInfo.pQueueFamilyIndices = &family;
@@ -68,6 +71,7 @@ VkImage createImage(
 VkImageView createView(
     VkDevice device,
     VkImage image,
+    VkImageViewType type,
     VkFormat format,
     VkImageAspectFlags aspectMask
 ) {
@@ -79,7 +83,7 @@ VkImageView createView(
     createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
     createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
     createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-    createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    createInfo.viewType = type;
     createInfo.format = format;
     createInfo.image = image;
     createInfo.subresourceRange.aspectMask = aspectMask;
@@ -98,23 +102,28 @@ VkImageView createView(
 VulkanImage createVulkanImage(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
+    VkImageType type,
+    VkImageViewType viewType,
     VkExtent2D extent,
+    uint32_t layerCount,
     uint32_t family,
     VkFormat format,
     VkImageUsageFlags usage,
     VkImageAspectFlags aspectMask,
-    VkImageTiling tiling,
-    bool hostVisible
+    bool hostVisible = false,
+    VkImageCreateFlags imageCreateFlags = 0
 ) {
     VulkanImage result = {};
 
     result.handle = createImage(
         device,
+        type,
         extent,
+        layerCount,
         family,
         format,
-        tiling,
-        usage
+        usage,
+        imageCreateFlags
     );
 
     auto reqs = getMemoryRequirements(device, result.handle);
@@ -123,7 +132,9 @@ VulkanImage createVulkanImage(
     auto memType = selectMemoryTypeIndex(memories, reqs, flags);
     result.memory = allocate(device, reqs.size, memType, result.handle);
 
-    result.view = createView(device, result.handle, format, aspectMask);
+    result.view = createView(
+        device, result.handle, viewType, format, aspectMask
+    );
 
     return result;
 }
@@ -148,13 +159,14 @@ VulkanImage createVulkanDepthBuffer(
     auto result = createVulkanImage(
         device,
         memories,
+        VK_IMAGE_TYPE_2D,
+        VK_IMAGE_VIEW_TYPE_2D,
         extent,
+        1,
         family,
         VK_FORMAT_D32_SFLOAT,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-        VK_IMAGE_ASPECT_DEPTH_BIT,
-        VK_IMAGE_TILING_OPTIMAL,
-        false
+        VK_IMAGE_ASPECT_DEPTH_BIT
     );
     return result;
 }
@@ -162,21 +174,28 @@ VulkanImage createVulkanDepthBuffer(
 VulkanSampler createVulkanSampler(
     VkDevice device,
     VkPhysicalDeviceMemoryProperties& memories,
+    VkImageType type,
+    VkImageViewType viewType,
     VkExtent2D extent,
-    uint32_t family
+    uint32_t layerCount,
+    uint32_t family,
+    VkImageCreateFlags imageCreateFlags = (VkImageCreateFlags)0
 ) {
     VulkanSampler result = {};
 
     result.image = createVulkanImage(
         device,
         memories,
+        type,
+        viewType,
         extent,
+        layerCount,
         family,
         VK_FORMAT_R8G8B8A8_SRGB,
-        VK_IMAGE_USAGE_SAMPLED_BIT,
+        VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
         VK_IMAGE_ASPECT_COLOR_BIT,
-        VK_IMAGE_TILING_LINEAR,
-        true
+        false,
+        imageCreateFlags
     );
 
     VkSamplerCreateInfo createInfo = { VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO };
@@ -200,4 +219,41 @@ VulkanSampler createVulkanSampler(
     }
 
     return result;
+}
+
+VulkanSampler createVulkanSampler2D(
+    VkDevice device,
+    VkPhysicalDeviceMemoryProperties& memories,
+    VkExtent2D extent,
+    uint32_t family
+) {
+    return createVulkanSampler(
+        device,
+        memories,
+        VK_IMAGE_TYPE_2D,
+        VK_IMAGE_VIEW_TYPE_2D,
+        extent,
+        1,
+        family
+    );
+}
+
+VulkanSampler createVulkanSamplerCube(
+    VkDevice device,
+    VkPhysicalDeviceMemoryProperties& memories,
+    VkExtent2D extent,
+    uint32_t family
+) {
+    VulkanImage result = {};
+
+    return createVulkanSampler(
+        device,
+        memories,
+        VK_IMAGE_TYPE_2D,
+        VK_IMAGE_VIEW_TYPE_CUBE,
+        extent,
+        6,
+        family,
+        VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT
+    );
 }

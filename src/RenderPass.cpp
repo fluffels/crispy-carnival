@@ -103,44 +103,45 @@ void updateDescriptorSet(Vulkan& vk, RenderPass& pass) {
 
     vector<VkWriteDescriptorSet> writeSets;
 
-    VkWriteDescriptorSet write = {};
-    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    write.descriptorCount = 1;
-    write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    write.dstBinding = writeSets.size();
-    write.dstSet = vk.pipeline.descriptorSet;
-    write.pBufferInfo = &mvpBufferInfo;
-    writeSets.push_back(write);
-
-    auto samplerCount = pass.samplers.size();
-    vector<VkDescriptorImageInfo> imageInfos(samplerCount);
-    for (int i = 0; i < samplerCount; i++) {
-        auto& imageInfo = imageInfos[i];
-        auto& sampler = pass.samplers[i];
-        imageInfo.imageView = sampler.image.view;
-        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.sampler = sampler.handle;
+    {
+        VkWriteDescriptorSet write = {};
+        write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        write.descriptorCount = 1;
+        write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        write.dstBinding = writeSets.size();
+        write.dstSet = vk.pipeline.descriptorSet;
+        write.pBufferInfo = &mvpBufferInfo;
+        writeSets.push_back(write);
     }
 
-    write = {};
-    write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    write.dstSet = vk.pipeline.descriptorSet;
-    write.dstBinding = writeSets.size();
-    write.descriptorCount = (uint32_t)imageInfos.size();
-    write.pImageInfo = imageInfos.data();
-    writeSets.push_back(write);
+    {
+        VkDescriptorImageInfo imageInfo;
+        imageInfo.imageView = pass.skybox.image.view;
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.sampler = pass.skybox.handle;
+
+        VkWriteDescriptorSet write = {};
+        write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        write.descriptorCount = 1;
+        write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        write.dstBinding = writeSets.size();
+        write.dstSet = vk.pipeline.descriptorSet;
+        write.pImageInfo = &imageInfo;
+        writeSets.push_back(write);
+    }
 
     vkUpdateDescriptorSets(
         vk.device,
-        writeSets.size(),
-        writeSets.data(),
+        writeSets.size(), writeSets.data(),
         0,
         nullptr
     );
 }
 
 void uploadTextures(Vulkan& vk, RenderPass& pass) {
+    // NOTE(jan): Extent must be the same for all cube face textures.
+    VkExtent2D extent;
+
     vector<string> fnames = {
         "textures/xn.png",
         "textures/xp.png",
@@ -149,63 +150,118 @@ void uploadTextures(Vulkan& vk, RenderPass& pass) {
         "textures/zn.png",
         "textures/zp.png",
     };
+    vector<VulkanBuffer> stagingBuffers;
     for (auto& fname: fnames) {
         int32_t x, y, n;
         uint8_t* data = stbi_load(fname.c_str(), &x, &y, &n, 4);
+        extent = {(uint32_t)x, (uint32_t)y};
         auto size = x * y * 4;
-        VkExtent2D extent = {x, y};
-        auto sampler = createVulkanSampler(
-            vk.device, vk.memories, extent, vk.queueFamily
-        );
-        auto& image = sampler.image;
-        void* dst = mapMemory(vk.device, image.handle, image.memory);
-            memcpy(dst, data, size);
-        unMapMemory(vk.device, image.memory);
-        pass.samplers.push_back(sampler);
-    }
-}
 
-void transitionTextures(Vulkan& vk, RenderPass& pass) {
-    auto sampler = pass.samplers[0];
+        auto& staging = stagingBuffers.emplace_back();
+        createStagingBuffer(
+            vk.device,
+            vk.memories,
+            vk.queueFamily,
+            size,
+            staging
+        );
+
+        void* dst = mapMemory(vk.device, staging.handle, staging.memory);
+            memcpy(dst, data, size);
+        unMapMemory(vk.device, staging.memory);
+    }
+    pass.skybox = createVulkanSamplerCube(
+        vk.device, vk.memories, extent, vk.queueFamily
+    );
+    auto& image = pass.skybox.image;
 
     auto cmd = allocateCommandBuffer(vk.device, vk.cmdPoolTransient);
     beginOneOffCommandBuffer(cmd);
 
-    VkImageMemoryBarrier barrier = {};
-    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-    barrier.image = sampler.image.handle;
-    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    barrier.subresourceRange.baseArrayLayer = 0;
-    barrier.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
-    barrier.subresourceRange.baseMipLevel = 0;
-    barrier.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
-    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-    barrier.srcAccessMask = 0;
-    barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    {
+        VkImageMemoryBarrier barrier = {};
+        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        barrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        barrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        barrier.image = image.handle;
+        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        barrier.subresourceRange.baseArrayLayer = 0;
+        barrier.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+        barrier.subresourceRange.baseMipLevel = 0;
+        barrier.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.srcAccessMask = 0;
+        barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
 
-    vkCmdPipelineBarrier(
-        cmd,
-        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-        0,
-        0,
-        nullptr,
-        0,
-        nullptr,
-        1,
-        &barrier
-    );
-    
+        vkCmdPipelineBarrier(
+            cmd,
+            VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+            VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+            0,
+            0, nullptr,
+            0, nullptr,
+            1, &barrier
+        );
+    }
+
+    for (int layerIdx = 0; layerIdx < stagingBuffers.size(); layerIdx++) {
+        auto& staging = stagingBuffers[layerIdx];
+
+        VkBufferImageCopy region = {};
+        region.bufferOffset = 0;
+        region.bufferRowLength = 0;
+        region.bufferImageHeight = 0;
+        region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        region.imageSubresource.baseArrayLayer = layerIdx;
+        region.imageSubresource.layerCount = 1;
+        region.imageSubresource.mipLevel = 0;
+        region.imageOffset = { 0, 0, 0 };
+        region.imageExtent = { extent.width, extent.height, 1 };
+
+        vkCmdCopyBufferToImage(
+            cmd,
+            staging.handle,
+            image.handle,
+            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+            1, &region
+        );
+    }
+
+    {
+        VkImageMemoryBarrier barrier = {};
+        barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+        barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        barrier.image = image.handle;
+        barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        barrier.subresourceRange.baseArrayLayer = 0;
+        barrier.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
+        barrier.subresourceRange.baseMipLevel = 0;
+        barrier.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+        barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+
+        vkCmdPipelineBarrier(
+            cmd,
+            VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+            VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+            0,
+            0, nullptr,
+            0, nullptr,
+            1, &barrier
+        );
+    }
+
     endCommandBuffer(cmd);
 
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &cmd;
-    vkQueueSubmit(vk.queue, 1, &submitInfo, 0);
+    vkQueueSubmit(vk.queue, 1, &submitInfo, nullptr);
 }
 
 void uploadVertexData(Vulkan& vk, RenderPass& pass) {
@@ -263,7 +319,6 @@ void uploadIndexData(Vulkan& vk, RenderPass& pass) {
 
 void initRenderPass(Vulkan& vk, RenderPass& pass) {
     uploadTextures(vk, pass);
-    transitionTextures(vk, pass);
     updateDescriptorSet(vk, pass);
     uploadVertexData(vk, pass);
     uploadIndexData(vk, pass);
