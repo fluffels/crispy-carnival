@@ -270,22 +270,14 @@ void uploadVertexData(Vulkan& vk, RenderPass& pass) {
     vector<Vertex> vertices(8);
 
     vertices[0].pos = { -SIZE, -SIZE, SIZE };
-    vertices[0].texCoord = {0, 1};
     vertices[1].pos = { -SIZE, SIZE, SIZE };
-    vertices[1].texCoord = {0, 0};
     vertices[2].pos = { SIZE, SIZE, SIZE };
-    vertices[2].texCoord = {1, 0};
     vertices[3].pos = { SIZE, -SIZE, SIZE };
-    vertices[3].texCoord = {1, 1};
 
     vertices[4].pos = { -SIZE, -SIZE, -SIZE };
-    vertices[4].texCoord = {0, 1};
     vertices[5].pos = { -SIZE, SIZE, -SIZE };
-    vertices[5].texCoord = {0, 0};
     vertices[6].pos = { SIZE, SIZE, -SIZE };
-    vertices[6].texCoord = {1, 0};
     vertices[7].pos = { SIZE, -SIZE, -SIZE };
-    vertices[7].texCoord = {1, 1};
 
     uint32_t size = sizeof(Vertex) * vertices.size();
 

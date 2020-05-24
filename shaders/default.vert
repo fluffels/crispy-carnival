@@ -6,14 +6,10 @@ layout(binding=0) uniform Uniform {
 } uniforms;
 
 layout(location=0) in vec3 inPosition;
-layout(location=1) in vec2 inTexCoord;
-layout(location=2) in uint inTexIdx;
 
 layout(location=0) out vec4 outViewDir;
-layout(location=1) out flat uint outTexIdx;
 
 void main() {
     gl_Position = uniforms.mvp * vec4(inPosition, 1.0);
     outViewDir = vec4(inPosition, 0);
-    outTexIdx = inTexIdx;
 }

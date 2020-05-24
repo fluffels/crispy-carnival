@@ -10,8 +10,6 @@
 class Vertex {
     public:
         glm::vec3 pos;
-        glm::vec2 texCoord;
-        uint32_t texIdx;
 
         static VkVertexInputBindingDescription
         getInputBindingDescription();

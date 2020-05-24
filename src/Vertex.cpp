@@ -22,17 +22,5 @@ getInputAttributeDescriptions() {
     attr.offset = offsetof(Vertex, pos);
     attrs.push_back(attr);
 
-    attr.binding = 0;
-    attr.location = attrs.size();
-    attr.format = VK_FORMAT_R32G32_SFLOAT;
-    attr.offset = offsetof(Vertex, texCoord);
-    attrs.push_back(attr);
-
-    attr.binding = 0;
-    attr.location = attrs.size();
-    attr.format = VK_FORMAT_R32_UINT;
-    attr.offset = offsetof(Vertex, texIdx);
-    attrs.push_back(attr);
-
     return attrs;
 }
