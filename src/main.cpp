@@ -107,7 +107,7 @@ WinMain(
     HWND window = CreateWindowEx(
         0,
         "MainWindowClass",
-        "kwark",
+        "crispy-carnival",
         WS_POPUP | WS_VISIBLE,
         CW_USEDEFAULT,
         CW_USEDEFAULT,
