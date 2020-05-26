@@ -4,9 +4,12 @@
 #include <string>
 #include <vector>
 
+#define OBJL_IMPLEMENTATION
+#include "obj_loader.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#include "FileSystem.h"
 #include "RenderPass.h"
 #include "util.h"
 #include "Vertex.h"
@@ -264,20 +267,18 @@ void uploadTextures(Vulkan& vk, RenderPass& pass) {
     vkQueueSubmit(vk.queue, 1, &submitInfo, nullptr);
 }
 
-void uploadVertexData(Vulkan& vk, RenderPass& pass) {
-    const float SIZE = 500.f;
+void loadObj(char* filename, objl_obj_file& obj) {
+    auto objData = readFile(filename);
+    objl_LoadObjMalloc(objData.data(), &obj);
+}
 
-    vector<Vertex> vertices(8);
-
-    vertices[0].pos = { -SIZE, -SIZE, SIZE };
-    vertices[1].pos = { -SIZE, SIZE, SIZE };
-    vertices[2].pos = { SIZE, SIZE, SIZE };
-    vertices[3].pos = { SIZE, -SIZE, SIZE };
-
-    vertices[4].pos = { -SIZE, -SIZE, -SIZE };
-    vertices[5].pos = { -SIZE, SIZE, -SIZE };
-    vertices[6].pos = { SIZE, SIZE, -SIZE };
-    vertices[7].pos = { SIZE, -SIZE, -SIZE };
+void uploadVertexData(Vulkan& vk, RenderPass& pass, objl_obj_file& obj) {
+    vector<Vertex> vertices(obj.v_count);
+    for (int i = 0; i < obj.v_count; i++) {
+        vertices[i].pos.x = obj.v[i].x;
+        vertices[i].pos.y = obj.v[i].y;
+        vertices[i].pos.z = obj.v[i].z;
+    }
 
     uint32_t size = sizeof(Vertex) * vertices.size();
 
@@ -290,30 +291,35 @@ void uploadVertexData(Vulkan& vk, RenderPass& pass) {
     unMapMemory(vk.device, pass.vBuff.memory);
 }
 
-void uploadIndexData(Vulkan& vk, RenderPass& pass) {
-    uint32_t indices[] = {
-        0, 1, 2, 3, 7, 4, 5, 1,
-        0xFFFFFFFF,
-        6, 2, 1, 5, 4, 7, 3, 2
-    };
+void uploadIndexData(Vulkan& vk, RenderPass& pass, objl_obj_file& obj) {
+    vector<uint32_t> indices(obj.f_count * 3);
+    
+    for (int i = 0; i < obj.f_count; i++) {
+        auto& face = obj.f[i];
+        indices[i * 3] = face.f0.vertex;
+        indices[i * 3 + 1] = face.f1.vertex;
+        indices[i * 3 + 2] = face.f2.vertex;
+    }
 
-    uint32_t size = sizeof(indices);
-    pass.idxCount = size / sizeof(uint32_t);
+    pass.idxCount = indices.size();
+    uint32_t size = indices.size() * sizeof(uint32_t);
 
     createIndexBuffer(
         vk.device, vk.memories, vk.queueFamily, size, pass.iBuff
     );
 
     void* dst = mapMemory(vk.device, pass.iBuff.handle, pass.iBuff.memory);
-        memcpy(dst, indices, size);
+        memcpy(dst, indices.data(), size);
     unMapMemory(vk.device, pass.iBuff.memory);
 }
 
 void initRenderPass(Vulkan& vk, RenderPass& pass) {
+    objl_obj_file obj;
+    loadObj("models/skybox.obj", obj);
+    uploadVertexData(vk, pass, obj);
+    uploadIndexData(vk, pass, obj);
     uploadTextures(vk, pass);
     updateDescriptorSet(vk, pass);
-    uploadVertexData(vk, pass);
-    uploadIndexData(vk, pass);
     createCommandBuffers(vk, pass);
     recordCommandBuffers(vk, pass);
 }

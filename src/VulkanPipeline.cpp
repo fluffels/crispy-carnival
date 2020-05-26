@@ -169,8 +169,8 @@ void createPipeline(
     VkPipelineInputAssemblyStateCreateInfo assembly = {};
     assembly.sType =
         VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_FAN;
-    assembly.primitiveRestartEnable = VK_TRUE;
+    assembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    assembly.primitiveRestartEnable = VK_FALSE;
 
     VkViewport viewport = {};
     viewport.height = (float)vk.swap.extent.height;
