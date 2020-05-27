@@ -10,7 +10,6 @@ readFile(const std::filesystem::path& path) {
     std::vector<char> buffer(size);
     file.seekg(0);
     file.read(buffer.data(), size);
-    buffer.push_back('\0');
     file.close();
     return buffer;
 }
