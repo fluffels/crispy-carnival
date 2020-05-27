@@ -4,10 +4,10 @@
 #include <string>
 #include <vector>
 
-#define OBJL_IMPLEMENTATION
-#include "obj_loader.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#define TINYOBJLOADER_IMPLEMENTATION
+#include "tiny_obj_loader.h"
 
 #include "FileSystem.h"
 #include "RenderPass.h"
@@ -16,6 +16,9 @@
 
 using std::string;
 using std::vector;
+using tinyobj::attrib_t;
+using tinyobj::shape_t;
+using tinyobj::LoadObj;
 
 void createCommandBuffers(Vulkan& vk, RenderPass& pass) {
     auto count = vk.swap.images.size();
@@ -88,6 +91,25 @@ void recordCommandBuffers(Vulkan& vk, RenderPass& pass) {
         vkCmdDrawIndexed(
             cmd,
             pass.mesh.idxCount, 1,
+            0, 0,
+            0
+        );
+
+        vkCmdBindVertexBuffers(
+            cmd,
+            0, 1,
+            &pass.mesh2.vBuff.handle,
+            offsets
+        );
+        vkCmdBindIndexBuffer(
+            cmd,
+            pass.mesh2.iBuff.handle,
+            0,
+            VK_INDEX_TYPE_UINT32
+        );
+        vkCmdDrawIndexed(
+            cmd,
+            pass.mesh2.idxCount, 1,
             0, 0,
             0
         );
@@ -267,20 +289,38 @@ void uploadTextures(Vulkan& vk, RenderPass& pass) {
     vkQueueSubmit(vk.queue, 1, &submitInfo, nullptr);
 }
 
-void loadObj(char* filename, objl_obj_file& obj) {
-    auto objData = readFile(filename);
-    objl_LoadObjMalloc(objData.data(), &obj);
-}
+void loadObj(char* filename, attrib_t& attrib, vector<shape_t>& shapes) {
+    std::string warn;
+    std::string err;
 
-void uploadVertexData(Vulkan& vk, Mesh& mesh, objl_obj_file& obj) {
-    vector<Vertex> vertices(obj.v_count);
-    for (int i = 0; i < obj.v_count; i++) {
-        vertices[i].pos.x = obj.v[i].x;
-        vertices[i].pos.y = obj.v[i].y;
-        vertices[i].pos.z = obj.v[i].z;
+    bool ret = LoadObj(
+        &attrib, &shapes, nullptr, &warn, &err, filename
+    );
+
+    if (!warn.empty()) {
+    std::cout << warn << std::endl;
     }
 
-    uint32_t size = sizeof(Vertex) * vertices.size();
+    if (!err.empty()) {
+    std::cerr << err << std::endl;
+    }
+
+    if (!ret) {
+    exit(1);
+    }
+}
+
+void uploadVertexData(Vulkan& vk, Mesh& mesh, attrib_t& attrib) {
+    uint32_t count = attrib.vertices.size() / 3;
+    vector<Vertex> vertices(count);
+    for (uint32_t i = 0; i < count; i++) {
+        uint32_t vertIdx = 3 * i;
+        vertices[i].pos.x = attrib.vertices[vertIdx + 0];
+        vertices[i].pos.y = attrib.vertices[vertIdx + 1];
+        vertices[i].pos.z = attrib.vertices[vertIdx + 2];
+    }
+
+    uint32_t size = sizeof(Vertex) * count;
 
     createVertexBuffer(
         vk.device, vk.memories, vk.queueFamily, size, mesh.vBuff
@@ -291,14 +331,12 @@ void uploadVertexData(Vulkan& vk, Mesh& mesh, objl_obj_file& obj) {
     unMapMemory(vk.device, mesh.vBuff.memory);
 }
 
-void uploadIndexData(Vulkan& vk, Mesh& mesh, objl_obj_file& obj) {
-    vector<uint32_t> indices(obj.f_count * 3);
-    
-    for (int i = 0; i < obj.f_count; i++) {
-        auto& face = obj.f[i];
-        indices[i * 3] = face.f0.vertex;
-        indices[i * 3 + 1] = face.f1.vertex;
-        indices[i * 3 + 2] = face.f2.vertex;
+void uploadIndexData(Vulkan& vk, Mesh& mesh, vector<shape_t>& shapes) {
+    vector<uint32_t> indices;
+    for (auto& shape: shapes) {
+        for (auto& index: shape.mesh.indices) {
+            indices.push_back(index.vertex_index);
+        }
     }
 
     mesh.idxCount = indices.size();
@@ -314,14 +352,16 @@ void uploadIndexData(Vulkan& vk, Mesh& mesh, objl_obj_file& obj) {
 }
 
 void uploadVertexDataFromObj(Vulkan& vk, char* filename, Mesh& mesh) {
-    objl_obj_file obj;
-    loadObj("models/skybox.obj", obj);
-    uploadVertexData(vk, mesh, obj);
-    uploadIndexData(vk, mesh, obj);
+    attrib_t attrib;
+    vector<shape_t> shapes;
+    loadObj(filename, attrib, shapes);
+    uploadVertexData(vk, mesh, attrib);
+    uploadIndexData(vk, mesh, shapes);
 }
 
 void initRenderPass(Vulkan& vk, RenderPass& pass) {
     uploadVertexDataFromObj(vk, "models/skybox.obj", pass.mesh);
+    uploadVertexDataFromObj(vk, "models/viper.obj", pass.mesh2);
     uploadTextures(vk, pass);
     updateDescriptorSet(vk, pass);
     createCommandBuffers(vk, pass);

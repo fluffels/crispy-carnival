@@ -3,3 +3,4 @@ lib/stb_image.h filter=lfs diff=lfs merge=lfs -text
 lib/easylogging++.cc filter=lfs diff=lfs merge=lfs -text
 lib/easylogging++.h filter=lfs diff=lfs merge=lfs -text
 lib/obj_loader.h filter=lfs diff=lfs merge=lfs -text
+lib/tiny_obj_loader.h filter=lfs diff=lfs merge=lfs -text
