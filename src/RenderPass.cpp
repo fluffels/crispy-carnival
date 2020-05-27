@@ -313,11 +313,15 @@ void uploadIndexData(Vulkan& vk, Mesh& mesh, objl_obj_file& obj) {
     unMapMemory(vk.device, mesh.iBuff.memory);
 }
 
-void initRenderPass(Vulkan& vk, RenderPass& pass) {
+void uploadVertexDataFromObj(Vulkan& vk, char* filename, Mesh& mesh) {
     objl_obj_file obj;
     loadObj("models/skybox.obj", obj);
-    uploadVertexData(vk, pass.mesh, obj);
-    uploadIndexData(vk, pass.mesh, obj);
+    uploadVertexData(vk, mesh, obj);
+    uploadIndexData(vk, mesh, obj);
+}
+
+void initRenderPass(Vulkan& vk, RenderPass& pass) {
+    uploadVertexDataFromObj(vk, "models/skybox.obj", pass.mesh);
     uploadTextures(vk, pass);
     updateDescriptorSet(vk, pass);
     createCommandBuffers(vk, pass);
