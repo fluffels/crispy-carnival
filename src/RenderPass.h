@@ -6,11 +6,15 @@
 
 using std::vector;
 
-struct RenderPass {
-    vector<VkCommandBuffer> cmds;
+struct Mesh {
     VulkanBuffer vBuff;
     VulkanBuffer iBuff;
     uint32_t idxCount;
+};
+
+struct RenderPass {
+    vector<VkCommandBuffer> cmds;
+    Mesh mesh;
     VulkanSampler skybox;
 };
 

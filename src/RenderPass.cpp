@@ -76,18 +76,18 @@ void recordCommandBuffers(Vulkan& vk, RenderPass& pass) {
         vkCmdBindVertexBuffers(
             cmd,
             0, 1,
-            &pass.vBuff.handle,
+            &pass.mesh.vBuff.handle,
             offsets
         );
         vkCmdBindIndexBuffer(
             cmd,
-            pass.iBuff.handle,
+            pass.mesh.iBuff.handle,
             0,
             VK_INDEX_TYPE_UINT32
         );
         vkCmdDrawIndexed(
             cmd,
-            pass.idxCount, 1,
+            pass.mesh.idxCount, 1,
             0, 0,
             0
         );
@@ -272,7 +272,7 @@ void loadObj(char* filename, objl_obj_file& obj) {
     objl_LoadObjMalloc(objData.data(), &obj);
 }
 
-void uploadVertexData(Vulkan& vk, RenderPass& pass, objl_obj_file& obj) {
+void uploadVertexData(Vulkan& vk, Mesh& mesh, objl_obj_file& obj) {
     vector<Vertex> vertices(obj.v_count);
     for (int i = 0; i < obj.v_count; i++) {
         vertices[i].pos.x = obj.v[i].x;
@@ -283,15 +283,15 @@ void uploadVertexData(Vulkan& vk, RenderPass& pass, objl_obj_file& obj) {
     uint32_t size = sizeof(Vertex) * vertices.size();
 
     createVertexBuffer(
-        vk.device, vk.memories, vk.queueFamily, size, pass.vBuff
+        vk.device, vk.memories, vk.queueFamily, size, mesh.vBuff
     );
 
-    void* dst = mapMemory(vk.device, pass.vBuff.handle, pass.vBuff.memory);
+    void* dst = mapMemory(vk.device, mesh.vBuff.handle, mesh.vBuff.memory);
         memcpy(dst, vertices.data(), size);
-    unMapMemory(vk.device, pass.vBuff.memory);
+    unMapMemory(vk.device, mesh.vBuff.memory);
 }
 
-void uploadIndexData(Vulkan& vk, RenderPass& pass, objl_obj_file& obj) {
+void uploadIndexData(Vulkan& vk, Mesh& mesh, objl_obj_file& obj) {
     vector<uint32_t> indices(obj.f_count * 3);
     
     for (int i = 0; i < obj.f_count; i++) {
@@ -301,23 +301,23 @@ void uploadIndexData(Vulkan& vk, RenderPass& pass, objl_obj_file& obj) {
         indices[i * 3 + 2] = face.f2.vertex;
     }
 
-    pass.idxCount = indices.size();
+    mesh.idxCount = indices.size();
     uint32_t size = indices.size() * sizeof(uint32_t);
 
     createIndexBuffer(
-        vk.device, vk.memories, vk.queueFamily, size, pass.iBuff
+        vk.device, vk.memories, vk.queueFamily, size, mesh.iBuff
     );
 
-    void* dst = mapMemory(vk.device, pass.iBuff.handle, pass.iBuff.memory);
+    void* dst = mapMemory(vk.device, mesh.iBuff.handle, mesh.iBuff.memory);
         memcpy(dst, indices.data(), size);
-    unMapMemory(vk.device, pass.iBuff.memory);
+    unMapMemory(vk.device, mesh.iBuff.memory);
 }
 
 void initRenderPass(Vulkan& vk, RenderPass& pass) {
     objl_obj_file obj;
     loadObj("models/skybox.obj", obj);
-    uploadVertexData(vk, pass, obj);
-    uploadIndexData(vk, pass, obj);
+    uploadVertexData(vk, pass.mesh, obj);
+    uploadIndexData(vk, pass.mesh, obj);
     uploadTextures(vk, pass);
     updateDescriptorSet(vk, pass);
     createCommandBuffers(vk, pass);
