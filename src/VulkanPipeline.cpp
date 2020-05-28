@@ -308,7 +308,7 @@ void initVKPipeline(Vulkan& vk) {
     allocateDescriptorSet(vk);
     createRenderPass(vk);
     createPipelineLayout(vk);
-    auto vert = createShaderModule(vk, "shaders/default.vert.spv");
-    auto frag = createShaderModule(vk, "shaders/default.frag.spv");
+    auto vert = createShaderModule(vk, "shaders/skybox.vert.spv");
+    auto frag = createShaderModule(vk, "shaders/skybox.frag.spv");
     createPipeline(vk, vert, frag);
 }
