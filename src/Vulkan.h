@@ -6,6 +6,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include "SPIRV-Reflect/spirv_reflect.h"
+
 #include "VulkanBuffer.h"
 #include "VulkanCommandBuffer.h"
 #include "VulkanImage.h"
@@ -15,12 +17,18 @@ using std::string;
 using std::runtime_error;
 using std::vector;
 
+struct VulkanShader {
+    VkShaderModule module;
+    SpvReflectShaderModule reflect;
+    vector<SpvReflectDescriptorSet*> sets;
+};
+
 struct VulkanPipeline {
     VkPipeline handle;
     VkPipelineLayout layout;
     VkRenderPass renderPass;
-    VkShaderModule vertexShader;
-    VkShaderModule fragmentShader;
+    VulkanShader vertexShader;
+    VulkanShader fragmentShader;
     VkDescriptorSetLayout descriptorLayout;
     VkDescriptorPool descriptorPool;
     VkDescriptorSet descriptorSet;

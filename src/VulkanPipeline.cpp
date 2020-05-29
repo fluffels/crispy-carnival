@@ -1,24 +1,28 @@
+#pragma warning(disable: 4267)
+
+#include "SPIRV-Reflect/spirv_reflect.h"
+
 #include "util.h"
 #include "FileSystem.h"
 #include "Vertex.h"
 #include "Vulkan.h"
 
-void createDescriptorLayout(Vulkan& vk) {
+void createDescriptorLayout(Vulkan& vk, vector<VulkanShader>& shaders) {
     vector<VkDescriptorSetLayoutBinding> bindings;
 
-    VkDescriptorSetLayoutBinding binding = {};
-    binding.binding = 0;
-    binding.descriptorCount = 1;
-    binding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    bindings.push_back(binding);
-    
-    binding = {};
-    binding.binding = 1;
-    binding.descriptorCount = 1;
-    binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-    bindings.push_back(binding);
+    for (auto& shader: shaders) {
+        for (auto& set: shader.sets) {
+            for (uint32_t i = set->set; i < set->binding_count; i++) {
+                auto& spirv = *(set->bindings[i]);
+
+                auto& desc = bindings.emplace_back();
+                desc.binding = spirv.binding;
+                desc.descriptorCount = spirv.count;
+                desc.descriptorType = (VkDescriptorType)spirv.descriptor_type;
+                desc.stageFlags = shader.reflect.shader_stage;
+            }
+        }
+    }
 
     VkDescriptorSetLayoutCreateInfo descriptors = {};
     descriptors.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -33,16 +37,39 @@ void createDescriptorLayout(Vulkan& vk) {
     ));
 }
 
-void createDescriptorPool(Vulkan& vk) {
-    VkDescriptorPoolSize poolSize = {};
-    poolSize.descriptorCount = 1;
-    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+void createDescriptorPool(Vulkan& vk, vector<VulkanShader>& shaders) {
+    vector<VkDescriptorPoolSize> sizes;
+
+    for (auto& shader: shaders) {
+        for (auto& set: shader.sets) {
+            for (uint32_t i = set->set; i < set->binding_count; i++) {
+                auto& spirv = *(set->bindings[i]);
+                auto type = (VkDescriptorType)spirv.descriptor_type;
+
+                VkDescriptorPoolSize* size = nullptr;
+                for (auto& candidate: sizes) {
+                    if (candidate.type == type) {
+                        size = &candidate;
+                        break;
+                    }
+                }
+
+                if (size == nullptr) {
+                    auto& size = sizes.emplace_back();
+                    size.descriptorCount = 1;
+                    size.type = type;
+                } else {
+                    size->descriptorCount++;
+                }
+            }
+        }
+    }
 
     VkDescriptorPoolCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     createInfo.maxSets = 1;
-    createInfo.poolSizeCount = 1;
-    createInfo.pPoolSizes = &poolSize;
+    createInfo.poolSizeCount = sizes.size();
+    createInfo.pPoolSizes = sizes.data();
 
     checkSuccess(vkCreateDescriptorPool(
         vk.device,
@@ -129,8 +156,26 @@ void createRenderPass(Vulkan& vk) {
     ));
 }
 
-VkShaderModule createShaderModule(Vulkan& vk, const vector<char>& code) {
-    VkShaderModule shaderModule;
+void createShaderModule(
+    Vulkan& vk,
+    const vector<char>& code,
+    VulkanShader& shader
+) {
+    SpvReflectResult result = spvReflectCreateShaderModule(
+        code.size(),
+        code.data(),
+        &shader.reflect
+    );
+    assert(result == SPV_REFLECT_RESULT_SUCCESS);
+    
+    uint32_t setCount = 0;
+    spvReflectEnumerateDescriptorSets(&shader.reflect, &setCount, nullptr);
+    shader.sets.resize(setCount);
+    spvReflectEnumerateDescriptorSets(
+        &shader.reflect,
+        &setCount,
+        shader.sets.data()
+    );
 
     VkShaderModuleCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -140,14 +185,13 @@ VkShaderModule createShaderModule(Vulkan& vk, const vector<char>& code) {
         vk.device,
         &createInfo,
         nullptr,
-        &shaderModule
+        &shader.module
     ));
-    return shaderModule;
 }
 
-VkShaderModule createShaderModule(Vulkan& vk, const string& path) {
+void createShaderModule(Vulkan& vk, const string& path, VulkanShader& shader) {
     auto code = readFile(path);
-    return createShaderModule(vk, code);
+    createShaderModule(vk, code, shader);
 }
 
 void createPipelineLayout(Vulkan& vk) {
@@ -163,25 +207,21 @@ void createPipelineLayout(Vulkan& vk) {
     ));
 }
 
-void createPipeline(
-    Vulkan& vk,
-    VkShaderModule& vertModule,
-    VkShaderModule& fragModule
-) {
+void createPipeline(Vulkan& vk, VulkanShader& vert, VulkanShader& frag) {
     vector<VkPipelineShaderStageCreateInfo> shaderStages;
-    if (vertModule != nullptr) {
+    if (vert.module) {
         VkPipelineShaderStageCreateInfo vertStage = {};
         vertStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         vertStage.stage = VK_SHADER_STAGE_VERTEX_BIT;
-        vertStage.module = vertModule;
+        vertStage.module = vert.module;
         vertStage.pName = "main";
         shaderStages.push_back(vertStage);
     }
-    if (fragModule != nullptr) {
+    if (frag.module) {
         VkPipelineShaderStageCreateInfo fragStage = {};
         fragStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         fragStage.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        fragStage.module = fragModule;
+        fragStage.module = frag.module;
         fragStage.pName = "main";
         shaderStages.push_back(fragStage);
     }
@@ -303,12 +343,14 @@ void createPipeline(
 }
 
 void initVKPipeline(Vulkan& vk) {
-    createDescriptorLayout(vk);
-    createDescriptorPool(vk);
+    vector<VulkanShader> shaders(2);
+    createShaderModule(vk, "shaders/skybox.vert.spv", shaders[0]);
+    createShaderModule(vk, "shaders/skybox.frag.spv", shaders[1]);
+
+    createDescriptorLayout(vk, shaders);
+    createDescriptorPool(vk, shaders);
     allocateDescriptorSet(vk);
     createRenderPass(vk);
     createPipelineLayout(vk);
-    auto vert = createShaderModule(vk, "shaders/skybox.vert.spv");
-    auto frag = createShaderModule(vk, "shaders/skybox.frag.spv");
-    createPipeline(vk, vert, frag);
+    createPipeline(vk, shaders[0], shaders[1]);
 }
