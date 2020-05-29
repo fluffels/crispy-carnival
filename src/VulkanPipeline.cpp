@@ -33,6 +33,38 @@ void createDescriptorLayout(Vulkan& vk) {
     ));
 }
 
+void createDescriptorPool(Vulkan& vk) {
+    VkDescriptorPoolSize poolSize = {};
+    poolSize.descriptorCount = 1;
+    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+
+    VkDescriptorPoolCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    createInfo.maxSets = 1;
+    createInfo.poolSizeCount = 1;
+    createInfo.pPoolSizes = &poolSize;
+
+    checkSuccess(vkCreateDescriptorPool(
+        vk.device,
+        &createInfo,
+        nullptr,
+        &vk.pipeline.descriptorPool
+    ));
+}
+
+void allocateDescriptorSet(Vulkan& vk) {
+    VkDescriptorSetAllocateInfo allocateInfo = {};
+    allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocateInfo.descriptorPool = vk.pipeline.descriptorPool;
+    allocateInfo.descriptorSetCount = 1;
+    allocateInfo.pSetLayouts = &vk.pipeline.descriptorLayout;
+    checkSuccess(vkAllocateDescriptorSets(
+        vk.device,
+        &allocateInfo,
+        &vk.pipeline.descriptorSet
+    ));
+}
+
 void createRenderPass(Vulkan& vk) {
     vector<VkAttachmentDescription> attachments;
     VkAttachmentDescription color = {};
@@ -267,38 +299,6 @@ void createPipeline(
         &createInfo,
         nullptr,
         &vk.pipeline.handle
-    ));
-}
-
-void createDescriptorPool(Vulkan& vk) {
-    VkDescriptorPoolSize poolSize = {};
-    poolSize.descriptorCount = 1;
-    poolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-
-    VkDescriptorPoolCreateInfo createInfo = {};
-    createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    createInfo.maxSets = 1;
-    createInfo.poolSizeCount = 1;
-    createInfo.pPoolSizes = &poolSize;
-
-    checkSuccess(vkCreateDescriptorPool(
-        vk.device,
-        &createInfo,
-        nullptr,
-        &vk.pipeline.descriptorPool
-    ));
-}
-
-void allocateDescriptorSet(Vulkan& vk) {
-    VkDescriptorSetAllocateInfo allocateInfo = {};
-    allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocateInfo.descriptorPool = vk.pipeline.descriptorPool;
-    allocateInfo.descriptorSetCount = 1;
-    allocateInfo.pSetLayouts = &vk.pipeline.descriptorLayout;
-    checkSuccess(vkAllocateDescriptorSets(
-        vk.device,
-        &allocateInfo,
-        &vk.pipeline.descriptorSet
     ));
 }
 
