@@ -10,7 +10,7 @@
 #include "tiny_obj_loader.h"
 
 #include "FileSystem.h"
-#include "RenderPass.h"
+#include "Brush.h"
 #include "util.h"
 #include "Vertex.h"
 
@@ -20,9 +20,9 @@ using tinyobj::attrib_t;
 using tinyobj::shape_t;
 using tinyobj::LoadObj;
 
-void createCommandBuffers(Vulkan& vk, RenderPass& pass) {
+void createCommandBuffers(Vulkan& vk, Brush& brush) {
     auto count = vk.swap.images.size();
-    pass.cmds.resize(count);
+    brush.cmds.resize(count);
 
     VkCommandBufferAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -32,13 +32,13 @@ void createCommandBuffers(Vulkan& vk, RenderPass& pass) {
     checkSuccess(vkAllocateCommandBuffers(
         vk.device,
         &allocInfo,
-        pass.cmds.data()
+        brush.cmds.data()
     ));
 }
 
-void recordCommandBuffers(Vulkan& vk, RenderPass& pass) {
+void recordCommandBuffers(Vulkan& vk, Brush& brush) {
     for (size_t swapIdx = 0; swapIdx < vk.swap.images.size(); swapIdx++) {
-        auto cmd = pass.cmds[swapIdx];
+        auto cmd = brush.cmds[swapIdx];
         beginFrameCommandBuffer(cmd);
 
         VkClearValue colorClear;
@@ -79,18 +79,18 @@ void recordCommandBuffers(Vulkan& vk, RenderPass& pass) {
         vkCmdBindVertexBuffers(
             cmd,
             0, 1,
-            &pass.mesh.vBuff.handle,
+            &brush.mesh.vBuff.handle,
             offsets
         );
         vkCmdBindIndexBuffer(
             cmd,
-            pass.mesh.iBuff.handle,
+            brush.mesh.iBuff.handle,
             0,
             VK_INDEX_TYPE_UINT32
         );
         vkCmdDrawIndexed(
             cmd,
-            pass.mesh.idxCount, 1,
+            brush.mesh.idxCount, 1,
             0, 0,
             0
         );
@@ -98,18 +98,18 @@ void recordCommandBuffers(Vulkan& vk, RenderPass& pass) {
         vkCmdBindVertexBuffers(
             cmd,
             0, 1,
-            &pass.mesh2.vBuff.handle,
+            &brush.mesh2.vBuff.handle,
             offsets
         );
         vkCmdBindIndexBuffer(
             cmd,
-            pass.mesh2.iBuff.handle,
+            brush.mesh2.iBuff.handle,
             0,
             VK_INDEX_TYPE_UINT32
         );
         vkCmdDrawIndexed(
             cmd,
-            pass.mesh2.idxCount, 1,
+            brush.mesh2.idxCount, 1,
             0, 0,
             0
         );
@@ -120,7 +120,7 @@ void recordCommandBuffers(Vulkan& vk, RenderPass& pass) {
     }
 }
 
-void updateDescriptorSet(Vulkan& vk, RenderPass& pass) {
+void updateDescriptorSet(Vulkan& vk, Brush& brush) {
     VkDescriptorBufferInfo mvpBufferInfo;
     mvpBufferInfo.buffer = vk.mvp.handle;
     mvpBufferInfo.offset = 0;
@@ -141,9 +141,9 @@ void updateDescriptorSet(Vulkan& vk, RenderPass& pass) {
 
     {
         VkDescriptorImageInfo imageInfo;
-        imageInfo.imageView = pass.skybox.image.view;
+        imageInfo.imageView = brush.skybox.image.view;
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.sampler = pass.skybox.handle;
+        imageInfo.sampler = brush.skybox.handle;
 
         VkWriteDescriptorSet write = {};
         write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -163,7 +163,7 @@ void updateDescriptorSet(Vulkan& vk, RenderPass& pass) {
     );
 }
 
-void uploadTextures(Vulkan& vk, RenderPass& pass) {
+void uploadTextures(Vulkan& vk, Brush& brush) {
     // NOTE(jan): Extent must be the same for all cube face textures.
     VkExtent2D extent;
 
@@ -195,10 +195,10 @@ void uploadTextures(Vulkan& vk, RenderPass& pass) {
             memcpy(dst, data, size);
         unMapMemory(vk.device, staging.memory);
     }
-    pass.skybox = createVulkanSamplerCube(
+    brush.skybox = createVulkanSamplerCube(
         vk.device, vk.memories, extent, vk.queueFamily
     );
-    auto& image = pass.skybox.image;
+    auto& image = brush.skybox.image;
 
     auto cmd = allocateCommandBuffer(vk.device, vk.cmdPoolTransient);
     beginOneOffCommandBuffer(cmd);
@@ -359,11 +359,11 @@ void uploadVertexDataFromObj(Vulkan& vk, char* filename, Mesh& mesh) {
     uploadIndexData(vk, mesh, shapes);
 }
 
-void initRenderPass(Vulkan& vk, RenderPass& pass) {
-    uploadVertexDataFromObj(vk, "models/skybox.obj", pass.mesh);
-    uploadVertexDataFromObj(vk, "models/viper.obj", pass.mesh2);
-    uploadTextures(vk, pass);
-    updateDescriptorSet(vk, pass);
-    createCommandBuffers(vk, pass);
-    recordCommandBuffers(vk, pass);
+void initBrush(Vulkan& vk, Brush& brush) {
+    uploadVertexDataFromObj(vk, "models/skybox.obj", brush.mesh);
+    uploadVertexDataFromObj(vk, "models/viper.obj", brush.mesh2);
+    uploadTextures(vk, brush);
+    updateDescriptorSet(vk, brush);
+    createCommandBuffers(vk, brush);
+    recordCommandBuffers(vk, brush);
 }

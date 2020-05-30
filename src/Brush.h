@@ -12,11 +12,11 @@ struct Mesh {
     uint32_t idxCount;
 };
 
-struct RenderPass {
+struct Brush {
     vector<VkCommandBuffer> cmds;
     Mesh mesh;
     Mesh mesh2;
     VulkanSampler skybox;
 };
 
-void initRenderPass(Vulkan&, RenderPass&);
+void initBrush(Vulkan&, Brush&);

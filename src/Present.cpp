@@ -11,7 +11,7 @@ void updateMVP(Vulkan& vk, void* data, size_t length) {
     unMapMemory(vk.device, vk.mvp.memory);
 }
 
-void present(Vulkan& vk, RenderPass& pass) {
+void present(Vulkan& vk, Brush& pass) {
     uint32_t imageIndex = 0;
     auto result = vkAcquireNextImageKHR(
         vk.device,

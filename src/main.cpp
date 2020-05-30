@@ -9,10 +9,10 @@
 #include "easylogging++.h"
 INITIALIZE_EASYLOGGINGPP
 
+#include "Brush.h"
 #include "Camera.h"
 #include "DirectInput.h"
 #include "Present.h"
-#include "RenderPass.h"
 #include "Vulkan.h"
 
 using std::exception;
@@ -138,8 +138,9 @@ WinMain(
     createVKInstance(vk);
     vk.swap.surface = getSurface(window, instance, vk.handle);
     initVK(vk);
-    RenderPass renderPass;
-    initRenderPass(vk, renderPass);
+
+    Brush skybox;
+    initBrush(vk, skybox);
 
     int errorCode = 0;
 
@@ -181,7 +182,7 @@ WinMain(
             QueryPerformanceCounter(&frameStart);
                 auto mvp = camera.get();
                 updateMVP(vk, &mvp, sizeof(mvp));
-                present(vk, renderPass);
+                present(vk, skybox);
             QueryPerformanceCounter(&frameEnd);
             frameDelta = frameEnd.QuadPart - frameStart.QuadPart;
             float s = (float)frameDelta / counterFrequency.QuadPart;

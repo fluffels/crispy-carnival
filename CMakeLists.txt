@@ -37,7 +37,7 @@ add_executable (
     src/FileSystem.cpp
     src/Mouse.cpp
     src/Present.cpp
-    src/RenderPass.cpp
+    src/Brush.cpp
     src/Vertex.cpp
     src/Vulkan.cpp
     src/VulkanBuffer.cpp
