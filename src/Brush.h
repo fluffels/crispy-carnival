@@ -2,15 +2,10 @@
 
 #include <vector>
 
+#include "Mesh.h"
 #include "Vulkan.h"
 
 using std::vector;
-
-struct Mesh {
-    VulkanBuffer vBuff;
-    VulkanBuffer iBuff;
-    uint32_t idxCount;
-};
 
 struct Brush {
     vector<VkCommandBuffer> cmds;

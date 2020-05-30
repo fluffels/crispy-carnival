@@ -35,9 +35,10 @@ add_executable (
     src/Controller.cpp
     src/DirectInput.cpp
     src/FileSystem.cpp
+    src/Brush.cpp
+    src/Mesh.cpp
     src/Mouse.cpp
     src/Present.cpp
-    src/Brush.cpp
     src/Vertex.cpp
     src/Vulkan.cpp
     src/VulkanBuffer.cpp
