@@ -29,6 +29,7 @@ add_executable (
     Shaders
     lib/easylogging++.cc
     lib/SPIRV-Reflect/spirv_reflect.c
+    src/stb_image.c
     src/main.cpp
     src/util.cpp
     src/Camera.cpp
