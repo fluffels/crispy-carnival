@@ -142,6 +142,9 @@ WinMain(
     Brush skybox;
     initBrush(vk, skybox);
 
+    vector<vector<VkCommandBuffer>> cmdss;
+    cmdss.push_back(skybox.cmds);
+
     int errorCode = 0;
 
     Camera camera;
@@ -182,7 +185,7 @@ WinMain(
             QueryPerformanceCounter(&frameStart);
                 auto mvp = camera.get();
                 updateMVP(vk, &mvp, sizeof(mvp));
-                present(vk, skybox);
+                present(vk, cmdss);
             QueryPerformanceCounter(&frameEnd);
             frameDelta = frameEnd.QuadPart - frameStart.QuadPart;
             float s = (float)frameDelta / counterFrequency.QuadPart;

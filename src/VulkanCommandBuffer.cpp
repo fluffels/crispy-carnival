@@ -1,5 +1,6 @@
 #include <stdexcept>
 
+#include "util.h"
 #include "VulkanCommandBuffer.h"
 
 using std::runtime_error;
@@ -73,4 +74,24 @@ void endCommandBuffer(
     if (code != VK_SUCCESS) {
         throw runtime_error("could not end command buffer");
     }
+}
+
+void createCommandBuffers(
+    VkDevice device,
+    VkCommandPool pool,
+    uint32_t count,
+    vector<VkCommandBuffer>& buffers
+) {
+    buffers.resize(count);
+
+    VkCommandBufferAllocateInfo allocInfo = {};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = pool;
+    allocInfo.commandBufferCount = count;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    checkSuccess(vkAllocateCommandBuffers(
+        device,
+        &allocInfo,
+        buffers.data()
+    ));
 }

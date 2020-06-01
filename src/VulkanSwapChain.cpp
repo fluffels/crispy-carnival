@@ -137,7 +137,7 @@ void createFramebuffers(Vulkan& vk) {
         createInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         createInfo.attachmentCount = 2;
         createInfo.pAttachments = imageViews;
-        createInfo.renderPass = vk.pipeline.renderPass;
+        createInfo.renderPass = vk.renderPass;
         createInfo.height = vk.swap.extent.height;
         createInfo.width = vk.swap.extent.width;
         createInfo.layers = 1;

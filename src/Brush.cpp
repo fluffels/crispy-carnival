@@ -10,27 +10,12 @@
 #include "Brush.h"
 #include "util.h"
 #include "Vertex.h"
+#include "VulkanCommandBuffer.h"
 
 using std::string;
 using std::vector;
 
-void createCommandBuffers(Vulkan& vk, Brush& brush) {
-    auto count = vk.swap.images.size();
-    brush.cmds.resize(count);
-
-    VkCommandBufferAllocateInfo allocInfo = {};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = vk.cmdPool;
-    allocInfo.commandBufferCount = (uint32_t)count;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    checkSuccess(vkAllocateCommandBuffers(
-        vk.device,
-        &allocInfo,
-        brush.cmds.data()
-    ));
-}
-
-void recordCommandBuffers(Vulkan& vk, Brush& brush) {
+void recordCommandBuffers(Vulkan& vk, Brush& brush, VulkanPipeline& pipeline) {
     for (size_t swapIdx = 0; swapIdx < vk.swap.images.size(); swapIdx++) {
         auto cmd = brush.cmds[swapIdx];
         beginFrameCommandBuffer(cmd);
@@ -48,23 +33,23 @@ void recordCommandBuffers(Vulkan& vk, Brush& brush) {
         beginInfo.framebuffer = vk.swap.framebuffers[swapIdx];
         beginInfo.renderArea.extent = vk.swap.extent;
         beginInfo.renderArea.offset = {0, 0};
-        beginInfo.renderPass = vk.pipeline.renderPass;
+        beginInfo.renderPass = vk.renderPass;
 
         vkCmdBeginRenderPass(cmd, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         vkCmdBindPipeline(
             cmd,
             VK_PIPELINE_BIND_POINT_GRAPHICS,
-            vk.pipeline.handle
+            pipeline.handle
         );
 
         vkCmdBindDescriptorSets(
             cmd,
             VK_PIPELINE_BIND_POINT_GRAPHICS,
-            vk.pipeline.layout,
+            pipeline.layout,
             0,
             1,
-            &vk.pipeline.descriptorSet,
+            &pipeline.descriptorSet,
             0,
             nullptr
         );
@@ -89,32 +74,13 @@ void recordCommandBuffers(Vulkan& vk, Brush& brush) {
             0
         );
 
-        vkCmdBindVertexBuffers(
-            cmd,
-            0, 1,
-            &brush.mesh2.vBuff.handle,
-            offsets
-        );
-        vkCmdBindIndexBuffer(
-            cmd,
-            brush.mesh2.iBuff.handle,
-            0,
-            VK_INDEX_TYPE_UINT32
-        );
-        vkCmdDrawIndexed(
-            cmd,
-            brush.mesh2.idxCount, 1,
-            0, 0,
-            0
-        );
-
         vkCmdEndRenderPass(cmd);
 
         checkSuccess(vkEndCommandBuffer(cmd));
     }
 }
 
-void updateDescriptorSet(Vulkan& vk, Brush& brush) {
+void updateDescriptorSet(Vulkan& vk, Brush& brush, VulkanPipeline& pipeline) {
     VkDescriptorBufferInfo mvpBufferInfo;
     mvpBufferInfo.buffer = vk.mvp.handle;
     mvpBufferInfo.offset = 0;
@@ -128,7 +94,7 @@ void updateDescriptorSet(Vulkan& vk, Brush& brush) {
         write.descriptorCount = 1;
         write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
         write.dstBinding = writeSets.size();
-        write.dstSet = vk.pipeline.descriptorSet;
+        write.dstSet = pipeline.descriptorSet;
         write.pBufferInfo = &mvpBufferInfo;
         writeSets.push_back(write);
     }
@@ -144,7 +110,7 @@ void updateDescriptorSet(Vulkan& vk, Brush& brush) {
         write.descriptorCount = 1;
         write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         write.dstBinding = writeSets.size();
-        write.dstSet = vk.pipeline.descriptorSet;
+        write.dstSet = pipeline.descriptorSet;
         write.pImageInfo = &imageInfo;
         writeSets.push_back(write);
     }
@@ -284,10 +250,12 @@ void uploadTextures(Vulkan& vk, Brush& brush) {
 }
 
 void initBrush(Vulkan& vk, Brush& brush) {
+    VulkanPipeline pipeline;
+    initVKPipeline(vk, pipeline);
     uploadVertexDataFromObj(vk, "models/skybox.obj", brush.mesh);
-    uploadVertexDataFromObj(vk, "models/viper.obj", brush.mesh2);
     uploadTextures(vk, brush);
-    updateDescriptorSet(vk, brush);
-    createCommandBuffers(vk, brush);
-    recordCommandBuffers(vk, brush);
+    updateDescriptorSet(vk, brush, pipeline);
+    auto count = vk.swap.images.size();
+    createCommandBuffers(vk.device, vk.cmdPool, count, brush.cmds);
+    recordCommandBuffers(vk, brush, pipeline);
 }

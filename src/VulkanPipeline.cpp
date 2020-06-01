@@ -7,7 +7,11 @@
 #include "Vertex.h"
 #include "Vulkan.h"
 
-void createDescriptorLayout(Vulkan& vk, vector<VulkanShader>& shaders) {
+void createDescriptorLayout(
+    Vulkan& vk,
+    vector<VulkanShader>& shaders,
+    VulkanPipeline& pipeline
+) {
     vector<VkDescriptorSetLayoutBinding> bindings;
 
     for (auto& shader: shaders) {
@@ -33,11 +37,15 @@ void createDescriptorLayout(Vulkan& vk, vector<VulkanShader>& shaders) {
         vk.device,
         &descriptors,
         nullptr,
-        &vk.pipeline.descriptorLayout
+        &pipeline.descriptorLayout
     ));
 }
 
-void createDescriptorPool(Vulkan& vk, vector<VulkanShader>& shaders) {
+void createDescriptorPool(
+    Vulkan& vk,
+    vector<VulkanShader>& shaders,
+    VulkanPipeline& pipeline
+) {
     vector<VkDescriptorPoolSize> sizes;
 
     for (auto& shader: shaders) {
@@ -75,84 +83,20 @@ void createDescriptorPool(Vulkan& vk, vector<VulkanShader>& shaders) {
         vk.device,
         &createInfo,
         nullptr,
-        &vk.pipeline.descriptorPool
+        &pipeline.descriptorPool
     ));
 }
 
-void allocateDescriptorSet(Vulkan& vk) {
+void allocateDescriptorSet(Vulkan& vk, VulkanPipeline& pipeline) {
     VkDescriptorSetAllocateInfo allocateInfo = {};
     allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocateInfo.descriptorPool = vk.pipeline.descriptorPool;
+    allocateInfo.descriptorPool = pipeline.descriptorPool;
     allocateInfo.descriptorSetCount = 1;
-    allocateInfo.pSetLayouts = &vk.pipeline.descriptorLayout;
+    allocateInfo.pSetLayouts = &pipeline.descriptorLayout;
     checkSuccess(vkAllocateDescriptorSets(
         vk.device,
         &allocateInfo,
-        &vk.pipeline.descriptorSet
-    ));
-}
-
-void createRenderPass(Vulkan& vk) {
-    vector<VkAttachmentDescription> attachments;
-    VkAttachmentDescription color = {};
-    color.format = vk.swap.format;
-    color.samples = VK_SAMPLE_COUNT_1_BIT;
-    color.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    color.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    color.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    color.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    color.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    color.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-    attachments.push_back(color);
-    
-    VkAttachmentDescription depth = {};
-    depth.format = VK_FORMAT_D32_SFLOAT;
-    depth.samples = VK_SAMPLE_COUNT_1_BIT;
-    depth.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    depth.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depth.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    depth.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    depth.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    depth.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-    attachments.push_back(depth);
-
-    vector<VkAttachmentReference> colorReferences;
-    VkAttachmentReference colorReference = {};
-    colorReference.attachment = 0;
-    colorReference.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-    colorReferences.push_back(colorReference);
-
-    VkAttachmentReference depthReference = {};
-    depthReference.attachment = 1;
-    depthReference.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-
-    vector<VkSubpassDescription> subpasses;
-    VkSubpassDescription subpass = {};
-    subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-    subpass.colorAttachmentCount = (uint32_t)colorReferences.size();
-    subpass.pColorAttachments = colorReferences.data();
-    subpass.pDepthStencilAttachment = &depthReference;
-    subpasses.push_back(subpass);
-
-    VkSubpassDependency dependency = {};
-    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    dependency.srcAccessMask = 0;
-    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-    VkRenderPassCreateInfo createInfo = {};
-    createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    createInfo.attachmentCount = (uint32_t)attachments.size();
-    createInfo.pAttachments = attachments.data();
-    createInfo.subpassCount = (uint32_t)subpasses.size();
-    createInfo.pSubpasses = subpasses.data();
-    createInfo.dependencyCount = 1;
-    createInfo.pDependencies = &dependency;
-
-    checkSuccess(vkCreateRenderPass(
-        vk.device, &createInfo, nullptr, &vk.pipeline.renderPass
+        &pipeline.descriptorSet
     ));
 }
 
@@ -194,20 +138,25 @@ void createShaderModule(Vulkan& vk, const string& path, VulkanShader& shader) {
     createShaderModule(vk, code, shader);
 }
 
-void createPipelineLayout(Vulkan& vk) {
+void createPipelineLayout(Vulkan& vk, VulkanPipeline& pipeline) {
     VkPipelineLayoutCreateInfo createInfo = {};
     createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     createInfo.setLayoutCount = 1;
-    createInfo.pSetLayouts = &vk.pipeline.descriptorLayout;
+    createInfo.pSetLayouts = &pipeline.descriptorLayout;
     checkSuccess(vkCreatePipelineLayout(
         vk.device,
         &createInfo,
         nullptr,
-        &vk.pipeline.layout
+        &pipeline.layout
     ));
 }
 
-void createPipeline(Vulkan& vk, VulkanShader& vert, VulkanShader& frag) {
+void createPipeline(
+    Vulkan& vk,
+    VulkanShader& vert,
+    VulkanShader& frag,
+    VulkanPipeline& pipeline
+) {
     vector<VkPipelineShaderStageCreateInfo> shaderStages;
     if (vert.module) {
         VkPipelineShaderStageCreateInfo vertStage = {};
@@ -328,8 +277,8 @@ void createPipeline(Vulkan& vk, VulkanShader& vert, VulkanShader& frag) {
     createInfo.pMultisampleState = &msample;
     createInfo.pColorBlendState = &blending;
     createInfo.pDepthStencilState = &depthStencilCreateInfo;
-    createInfo.renderPass = vk.pipeline.renderPass;
-    createInfo.layout = vk.pipeline.layout;
+    createInfo.renderPass = vk.renderPass;
+    createInfo.layout = pipeline.layout;
     createInfo.subpass = 0;
     
     checkSuccess(vkCreateGraphicsPipelines(
@@ -338,19 +287,18 @@ void createPipeline(Vulkan& vk, VulkanShader& vert, VulkanShader& frag) {
         1,
         &createInfo,
         nullptr,
-        &vk.pipeline.handle
+        &pipeline.handle
     ));
 }
 
-void initVKPipeline(Vulkan& vk) {
+void initVKPipeline(Vulkan& vk, VulkanPipeline& pipeline) {
     vector<VulkanShader> shaders(2);
     createShaderModule(vk, "shaders/skybox.vert.spv", shaders[0]);
     createShaderModule(vk, "shaders/skybox.frag.spv", shaders[1]);
 
-    createDescriptorLayout(vk, shaders);
-    createDescriptorPool(vk, shaders);
-    allocateDescriptorSet(vk);
-    createRenderPass(vk);
-    createPipelineLayout(vk);
-    createPipeline(vk, shaders[0], shaders[1]);
+    createDescriptorLayout(vk, shaders, pipeline);
+    createDescriptorPool(vk, shaders, pipeline);
+    allocateDescriptorSet(vk, pipeline);
+    createPipelineLayout(vk, pipeline);
+    createPipeline(vk, shaders[0], shaders[1], pipeline);
 }

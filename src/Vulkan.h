@@ -26,7 +26,6 @@ struct VulkanShader {
 struct VulkanPipeline {
     VkPipeline handle;
     VkPipelineLayout layout;
-    VkRenderPass renderPass;
     VulkanShader vertexShader;
     VulkanShader fragmentShader;
     VkDescriptorSetLayout descriptorLayout;
@@ -59,7 +58,7 @@ struct Vulkan {
     uint32_t queueFamily;
     VkPhysicalDeviceMemoryProperties memories;
 
-    VulkanPipeline pipeline;
+    VkRenderPass renderPass;
     VulkanSwapChain swap;
 
     VulkanImage depth;
@@ -72,5 +71,5 @@ struct Vulkan {
 void createFramebuffers(Vulkan&);
 void createVKInstance(Vulkan& vk);
 void initVK(Vulkan& vk);
-void initVKPipeline(Vulkan& vk);
+void initVKPipeline(Vulkan& vk, VulkanPipeline& pipeline);
 void initVKSwapChain(Vulkan& vk);

@@ -11,7 +11,7 @@ void updateMVP(Vulkan& vk, void* data, size_t length) {
     unMapMemory(vk.device, vk.mvp.memory);
 }
 
-void present(Vulkan& vk, Brush& pass) {
+void present(Vulkan& vk, vector<vector<VkCommandBuffer>>& cmdBuffers) {
     uint32_t imageIndex = 0;
     auto result = vkAcquireNextImageKHR(
         vk.device,
@@ -31,19 +31,25 @@ void present(Vulkan& vk, Brush& pass) {
         throw std::runtime_error("could not acquire next image");
     }
 
-    VkSubmitInfo submitInfo = {};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &pass.cmds[imageIndex];
-    submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = &vk.swap.imageReady;
-    VkPipelineStageFlags waitStages[] = {
-        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-    };
-    submitInfo.pWaitDstStageMask = waitStages;
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = &vk.swap.presentReady;
-    vkQueueSubmit(vk.queue, 1, &submitInfo, nullptr);
+    for (auto& cmds: cmdBuffers) {
+        // VkTimelineSemaphoreSubmitInfo semaphoreInfo = {};
+        // semaphoreInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
+        // semaphoreInfo.pSignalSemaphoreValues
+
+        VkSubmitInfo submitInfo = {};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &cmds[imageIndex];
+        submitInfo.waitSemaphoreCount = 1;
+        submitInfo.pWaitSemaphores = &vk.swap.imageReady;
+        VkPipelineStageFlags waitStages[] = {
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+        };
+        submitInfo.pWaitDstStageMask = waitStages;
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores = &vk.swap.presentReady;
+        vkQueueSubmit(vk.queue, 1, &submitInfo, nullptr);
+    }
 
     VkPresentInfoKHR presentInfo = {};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
