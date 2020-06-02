@@ -291,10 +291,16 @@ void createPipeline(
     ));
 }
 
-void initVKPipeline(Vulkan& vk, VulkanPipeline& pipeline) {
+void initVKPipeline(Vulkan& vk, char* name, VulkanPipeline& pipeline) {
     vector<VulkanShader> shaders(2);
-    createShaderModule(vk, "shaders/skybox.vert.spv", shaders[0]);
-    createShaderModule(vk, "shaders/skybox.frag.spv", shaders[1]);
+
+    char vertFile[255];
+    sprintf_s(vertFile, "shaders/%s.vert.spv", name);
+    createShaderModule(vk, vertFile, shaders[0]);
+
+    char fragFile[255];
+    sprintf_s(fragFile, "shaders/%s.frag.spv", name);
+    createShaderModule(vk, fragFile, shaders[1]);
 
     createDescriptorLayout(vk, shaders, pipeline);
     createDescriptorPool(vk, shaders, pipeline);

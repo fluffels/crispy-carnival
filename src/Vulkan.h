@@ -71,5 +71,5 @@ struct Vulkan {
 void createFramebuffers(Vulkan&);
 void createVKInstance(Vulkan& vk);
 void initVK(Vulkan& vk);
-void initVKPipeline(Vulkan& vk, VulkanPipeline& pipeline);
+void initVKPipeline(Vulkan& vk, char* name, VulkanPipeline& pipeline);
 void initVKSwapChain(Vulkan& vk);

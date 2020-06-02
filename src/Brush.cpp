@@ -251,7 +251,7 @@ void uploadTextures(Vulkan& vk, Brush& brush) {
 
 void initBrush(Vulkan& vk, Brush& brush) {
     VulkanPipeline pipeline;
-    initVKPipeline(vk, pipeline);
+    initVKPipeline(vk, "skybox", pipeline);
     uploadVertexDataFromObj(vk, "models/skybox.obj", brush.mesh);
     uploadTextures(vk, brush);
     updateDescriptorSet(vk, brush, pipeline);
