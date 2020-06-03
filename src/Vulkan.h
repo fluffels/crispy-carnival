@@ -23,16 +23,6 @@ struct VulkanShader {
     vector<SpvReflectDescriptorSet*> sets;
 };
 
-struct VulkanPipeline {
-    VkPipeline handle;
-    VkPipelineLayout layout;
-    VulkanShader vertexShader;
-    VulkanShader fragmentShader;
-    VkDescriptorSetLayout descriptorLayout;
-    VkDescriptorPool descriptorPool;
-    VkDescriptorSet descriptorSet;
-};
-
 struct VulkanSwapChain {
     VkPresentModeKHR presentMode;
     VkSurfaceCapabilitiesKHR surfaceCapabilities;
@@ -71,5 +61,4 @@ struct Vulkan {
 void createFramebuffers(Vulkan&);
 void createVKInstance(Vulkan& vk);
 void initVK(Vulkan& vk);
-void initVKPipeline(Vulkan& vk, char* name, VulkanPipeline& pipeline);
 void initVKSwapChain(Vulkan& vk);

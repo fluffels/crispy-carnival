@@ -5,7 +5,7 @@
 #include "util.h"
 #include "FileSystem.h"
 #include "Vertex.h"
-#include "Vulkan.h"
+#include "VulkanPipeline.h"
 
 void createDescriptorLayout(
     Vulkan& vk,

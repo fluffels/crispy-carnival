@@ -11,6 +11,7 @@
 #include "util.h"
 #include "Vertex.h"
 #include "VulkanCommandBuffer.h"
+#include "VulkanPipeline.h"
 
 using std::string;
 using std::vector;
