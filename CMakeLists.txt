@@ -49,6 +49,7 @@ add_executable (
     src/VulkanPipeline.cpp
     src/VulkanSwapChain.cpp
     src/VulkanSynch.cpp
+    src/brushes/Spaceship.cpp
 )
 target_link_libraries(
     main

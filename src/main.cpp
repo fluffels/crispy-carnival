@@ -10,6 +10,7 @@
 INITIALIZE_EASYLOGGINGPP
 
 #include "Brush.h"
+#include "brushes/Spaceship.h"
 #include "Camera.h"
 #include "DirectInput.h"
 #include "Present.h"
@@ -144,6 +145,8 @@ WinMain(
 
     vector<vector<VkCommandBuffer>> cmdss;
     cmdss.push_back(skybox.cmds);
+    // TODO: auto& spaceShipCmds = cmdss.emplace_back();
+    // initSpaceship(vk, spaceShipCmds);
 
     int errorCode = 0;
 
