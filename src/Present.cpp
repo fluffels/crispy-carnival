@@ -31,7 +31,8 @@ void present(Vulkan& vk, vector<vector<VkCommandBuffer>>& cmdBuffers) {
         throw std::runtime_error("could not acquire next image");
     }
 
-    for (auto& cmds: cmdBuffers) {
+    //TODO for (auto& cmds: cmdBuffers) {
+        auto& cmds = cmdBuffers[1];
         // VkTimelineSemaphoreSubmitInfo semaphoreInfo = {};
         // semaphoreInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
         // semaphoreInfo.pSignalSemaphoreValues
@@ -49,7 +50,7 @@ void present(Vulkan& vk, vector<vector<VkCommandBuffer>>& cmdBuffers) {
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = &vk.swap.presentReady;
         vkQueueSubmit(vk.queue, 1, &submitInfo, nullptr);
-    }
+    //TODO }
 
     VkPresentInfoKHR presentInfo = {};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;

@@ -129,10 +129,10 @@ void updateDescriptorSet(Vulkan& vk, VulkanPipeline& pipeline, VulkanSampler& sa
     );
 }
 
-void uploadTexture(Vulkan& vk, string& fname, VulkanSampler& sampler) {
+void uploadTexture(Vulkan& vk, char* fname, VulkanSampler& sampler) {
     VkExtent2D extent;
     int32_t x, y, n;
-    uint8_t* data = stbi_load(fname.c_str(), &x, &y, &n, 4);
+    uint8_t* data = stbi_load(fname, &x, &y, &n, 4);
     extent = {(uint32_t)x, (uint32_t)y};
     auto size = x * y * 4;
 
@@ -244,4 +244,11 @@ void uploadTexture(Vulkan& vk, string& fname, VulkanSampler& sampler) {
 void initSpaceship(Vulkan& vk, vector<VkCommandBuffer>& cmds) {
     VulkanPipeline pipeline;
     initVKPipeline(vk, "spaceship", pipeline);
+    VulkanSampler sampler;
+    uploadTexture(vk, "textures/spaceship.png", sampler);
+    Mesh mesh;
+    uploadVertexDataFromObj(vk, "models/viper.obj", mesh);
+    updateDescriptorSet(vk, pipeline, sampler);
+    createCommandBuffers(vk.device, vk.cmdPool, vk.swap.images.size(), cmds);
+    recordCommandBuffers(vk, pipeline, mesh, cmds);
 }

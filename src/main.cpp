@@ -145,8 +145,8 @@ WinMain(
 
     vector<vector<VkCommandBuffer>> cmdss;
     cmdss.push_back(skybox.cmds);
-    // TODO: auto& spaceShipCmds = cmdss.emplace_back();
-    // initSpaceship(vk, spaceShipCmds);
+    auto& spaceShipCmds = cmdss.emplace_back();
+    initSpaceship(vk, spaceShipCmds);
 
     int errorCode = 0;
 
