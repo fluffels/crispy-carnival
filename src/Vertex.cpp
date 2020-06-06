@@ -15,12 +15,23 @@ std::vector<VkVertexInputAttributeDescription> Vertex::
 getInputAttributeDescriptions() {
     std::vector<VkVertexInputAttributeDescription> attrs;
 
-    VkVertexInputAttributeDescription attr = {};
-    attr.binding = 0;
-    attr.location = attrs.size();
-    attr.format = VK_FORMAT_R32G32B32_SFLOAT;
-    attr.offset = offsetof(Vertex, pos);
-    attrs.push_back(attr);
+    {
+        VkVertexInputAttributeDescription attr = {};
+        attr.binding = 0;
+        attr.location = attrs.size();
+        attr.format = VK_FORMAT_R32G32B32_SFLOAT;
+        attr.offset = offsetof(Vertex, pos);
+        attrs.push_back(attr);
+    }
+
+    {
+        VkVertexInputAttributeDescription attr = {};
+        attr.binding = 1;
+        attr.location = attrs.size();
+        attr.format = VK_FORMAT_R32G32_SFLOAT;
+        attr.offset = offsetof(Vertex, uv);
+        attrs.push_back(attr);
+    }
 
     return attrs;
 }
