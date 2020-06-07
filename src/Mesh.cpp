@@ -34,7 +34,7 @@ void loadObj(char* filename, attrib_t& attrib, vector<shape_t>& shapes) {
     }
 
     if (!ret) {
-    exit(1);
+        exit(1);
     }
 }
 
