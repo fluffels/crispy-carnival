@@ -42,10 +42,15 @@ void uploadVertexData(Vulkan& vk, Mesh& mesh, attrib_t& attrib) {
     uint32_t count = attrib.vertices.size() / 3;
     vector<Vertex> vertices(count);
     for (uint32_t i = 0; i < count; i++) {
+        uint32_t texIdx = 2 * i;
         uint32_t vertIdx = 3 * i;
         vertices[i].pos.x = attrib.vertices[vertIdx + 0];
         vertices[i].pos.y = attrib.vertices[vertIdx + 1];
         vertices[i].pos.z = attrib.vertices[vertIdx + 2];
+        if (texIdx < attrib.texcoords.size()) {
+            vertices[i].uv.s = attrib.texcoords[texIdx + 0];
+            vertices[i].uv.s = attrib.texcoords[texIdx + 1];
+        }
     }
 
     uint32_t size = sizeof(Vertex) * count;
