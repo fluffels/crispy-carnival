@@ -26,7 +26,7 @@ getInputAttributeDescriptions() {
 
     {
         VkVertexInputAttributeDescription attr = {};
-        attr.binding = 1;
+        attr.binding = 0;
         attr.location = attrs.size();
         attr.format = VK_FORMAT_R32G32_SFLOAT;
         attr.offset = offsetof(Vertex, uv);

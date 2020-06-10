@@ -32,7 +32,7 @@ void present(Vulkan& vk, vector<vector<VkCommandBuffer>>& cmdBuffers) {
     }
 
     //TODO for (auto& cmds: cmdBuffers) {
-        auto& cmds = cmdBuffers[1];
+        auto& cmds = cmdBuffers[0];
         // VkTimelineSemaphoreSubmitInfo semaphoreInfo = {};
         // semaphoreInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
         // semaphoreInfo.pSignalSemaphoreValues

@@ -140,11 +140,11 @@ WinMain(
     vk.swap.surface = getSurface(window, instance, vk.handle);
     initVK(vk);
 
-    Brush skybox;
-    initBrush(vk, skybox);
+    // Brush skybox;
+    // initBrush(vk, skybox);
 
     vector<vector<VkCommandBuffer>> cmdss;
-    cmdss.push_back(skybox.cmds);
+    // cmdss.push_back(skybox.cmds);
     auto& spaceShipCmds = cmdss.emplace_back();
     initSpaceship(vk, spaceShipCmds);
 
