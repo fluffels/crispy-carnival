@@ -48,8 +48,8 @@ void uploadVertexData(Vulkan& vk, Mesh& mesh, attrib_t& attrib) {
         vertices[i].pos.y = attrib.vertices[vertIdx + 1];
         vertices[i].pos.z = attrib.vertices[vertIdx + 2];
         if (texIdx < attrib.texcoords.size()) {
-            vertices[i].uv.s = attrib.texcoords[texIdx + 0];
-            vertices[i].uv.s = attrib.texcoords[texIdx + 1];
+            vertices[i].uv.x = attrib.texcoords[texIdx + 0];
+            vertices[i].uv.y = attrib.texcoords[texIdx + 1];
         }
     }
 
