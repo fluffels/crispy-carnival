@@ -31,26 +31,24 @@ void present(Vulkan& vk, vector<vector<VkCommandBuffer>>& cmdBuffers) {
         throw std::runtime_error("could not acquire next image");
     }
 
-    //TODO for (auto& cmds: cmdBuffers) {
-        auto& cmds = cmdBuffers[0];
-        // VkTimelineSemaphoreSubmitInfo semaphoreInfo = {};
-        // semaphoreInfo.sType = VK_STRUCTURE_TYPE_TIMELINE_SEMAPHORE_SUBMIT_INFO;
-        // semaphoreInfo.pSignalSemaphoreValues
+    vector<VkCommandBuffer> cmdHandles;
+    for (auto& cmdBuffer: cmdBuffers) {
+        cmdHandles.push_back(cmdBuffer[imageIndex]);
+    }
 
-        VkSubmitInfo submitInfo = {};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &cmds[imageIndex];
-        submitInfo.waitSemaphoreCount = 1;
-        submitInfo.pWaitSemaphores = &vk.swap.imageReady;
-        VkPipelineStageFlags waitStages[] = {
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
-        };
-        submitInfo.pWaitDstStageMask = waitStages;
-        submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores = &vk.swap.presentReady;
-        vkQueueSubmit(vk.queue, 1, &submitInfo, nullptr);
-    //TODO }
+    VkSubmitInfo submitInfo = {};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = cmdHandles.size();
+    submitInfo.pCommandBuffers = cmdHandles.data();
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = &vk.swap.imageReady;
+    VkPipelineStageFlags waitStages[] = {
+        VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
+    };
+    submitInfo.pWaitDstStageMask = waitStages;
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = &vk.swap.presentReady;
+    vkQueueSubmit(vk.queue, 1, &submitInfo, nullptr);
 
     VkPresentInfoKHR presentInfo = {};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
