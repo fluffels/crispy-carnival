@@ -2,6 +2,8 @@
 
 #include "SPIRV-Reflect/spirv_reflect.h"
 
+#include <io.h>
+
 #include "util.h"
 #include "FileSystem.h"
 #include "Vertex.h"
@@ -296,11 +298,15 @@ void initVKPipeline(Vulkan& vk, char* name, VulkanPipeline& pipeline) {
 
     char vertFile[255];
     sprintf_s(vertFile, "shaders/%s.vert.spv", name);
-    createShaderModule(vk, vertFile, shaders[0]);
+    if (_access_s(vertFile, 2) == 0) {
+        createShaderModule(vk, vertFile, shaders[0]);
+    }
 
     char fragFile[255];
     sprintf_s(fragFile, "shaders/%s.frag.spv", name);
-    createShaderModule(vk, fragFile, shaders[1]);
+    if (_access_s(vertFile, 2) == 0) {
+        createShaderModule(vk, fragFile, shaders[1]);
+    }
 
     createDescriptorLayout(vk, shaders, pipeline);
     createDescriptorPool(vk, shaders, pipeline);
