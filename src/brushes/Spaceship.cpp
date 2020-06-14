@@ -86,7 +86,7 @@ void recordCommandBuffers(
     }
 }
 
-void updateDescriptorSet(Vulkan& vk, VulkanPipeline& pipeline, VulkanSampler& sampler) {
+void updateDescriptorSetSpaceShip(Vulkan& vk, VulkanPipeline& pipeline, VulkanSampler& sampler) {
     VkDescriptorBufferInfo mvpBufferInfo;
     mvpBufferInfo.buffer = vk.mvp.handle;
     mvpBufferInfo.offset = 0;
@@ -241,14 +241,10 @@ void uploadTexture(Vulkan& vk, char* fname, VulkanSampler& sampler) {
     vkQueueSubmit(vk.queue, 1, &submitInfo, nullptr);
 }
 
-void initSpaceship(Vulkan& vk, vector<VkCommandBuffer>& cmds) {
-    VulkanPipeline pipeline;
-    initVKPipeline(vk, "spaceship", pipeline);
+void initSpaceship(Vulkan& vk, Brush& brush) {
+    initVKPipeline(vk, "spaceship", brush.pipeline);
     VulkanSampler sampler;
     uploadTexture(vk, "textures/spaceship.png", sampler);
-    Mesh mesh;
-    uploadVertexDataFromObj(vk, "models/viper.obj", mesh);
-    updateDescriptorSet(vk, pipeline, sampler);
-    createCommandBuffers(vk.device, vk.cmdPool, vk.swap.images.size(), cmds);
-    recordCommandBuffers(vk, pipeline, mesh, cmds);
+    uploadVertexDataFromObj(vk, "models/viper.obj", brush.mesh);
+    updateDescriptorSetSpaceShip(vk, brush.pipeline, sampler);
 }

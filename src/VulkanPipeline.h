@@ -1,3 +1,5 @@
+#pragma once
+
 #include "util.h"
 #include "Vulkan.h"
 

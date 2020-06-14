@@ -4,13 +4,13 @@
 
 #include "Mesh.h"
 #include "Vulkan.h"
+#include "VulkanPipeline.h"
 
 using std::vector;
 
 struct Brush {
-    vector<VkCommandBuffer> cmds;
     Mesh mesh;
-    VulkanSampler skybox;
+    VulkanPipeline pipeline;
 };
 
 void initBrush(Vulkan&, Brush&);

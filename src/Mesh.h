@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Vulkan.h"
 
 struct Mesh {

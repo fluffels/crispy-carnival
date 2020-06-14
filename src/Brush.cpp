@@ -16,6 +16,7 @@
 using std::string;
 using std::vector;
 
+/*
 void recordCommandBuffers(Vulkan& vk, Brush& brush, VulkanPipeline& pipeline) {
     for (size_t swapIdx = 0; swapIdx < vk.swap.images.size(); swapIdx++) {
         auto cmd = brush.cmds[swapIdx];
@@ -80,8 +81,13 @@ void recordCommandBuffers(Vulkan& vk, Brush& brush, VulkanPipeline& pipeline) {
         checkSuccess(vkEndCommandBuffer(cmd));
     }
 }
+*/
 
-void updateDescriptorSet(Vulkan& vk, Brush& brush, VulkanPipeline& pipeline) {
+void updateDescriptorSet(
+    Vulkan& vk,
+    VulkanPipeline& pipeline,
+    VulkanSampler& sampler
+) {
     VkDescriptorBufferInfo mvpBufferInfo;
     mvpBufferInfo.buffer = vk.mvp.handle;
     mvpBufferInfo.offset = 0;
@@ -102,9 +108,9 @@ void updateDescriptorSet(Vulkan& vk, Brush& brush, VulkanPipeline& pipeline) {
 
     {
         VkDescriptorImageInfo imageInfo;
-        imageInfo.imageView = brush.skybox.image.view;
+        imageInfo.imageView = sampler.image.view;
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.sampler = brush.skybox.handle;
+        imageInfo.sampler = sampler.handle;
 
         VkWriteDescriptorSet write = {};
         write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -124,7 +130,7 @@ void updateDescriptorSet(Vulkan& vk, Brush& brush, VulkanPipeline& pipeline) {
     );
 }
 
-void uploadTextures(Vulkan& vk, Brush& brush) {
+void uploadTextures(Vulkan& vk, VulkanSampler& sampler) {
     // NOTE(jan): Extent must be the same for all cube face textures.
     VkExtent2D extent;
 
@@ -156,10 +162,10 @@ void uploadTextures(Vulkan& vk, Brush& brush) {
             memcpy(dst, data, size);
         unMapMemory(vk.device, staging.memory);
     }
-    brush.skybox = createVulkanSamplerCube(
+    sampler = createVulkanSamplerCube(
         vk.device, vk.memories, extent, vk.queueFamily
     );
-    auto& image = brush.skybox.image;
+    auto& image = sampler.image;
 
     auto cmd = allocateCommandBuffer(vk.device, vk.cmdPoolTransient);
     beginOneOffCommandBuffer(cmd);
@@ -251,12 +257,10 @@ void uploadTextures(Vulkan& vk, Brush& brush) {
 }
 
 void initBrush(Vulkan& vk, Brush& brush) {
-    VulkanPipeline pipeline;
-    initVKPipeline(vk, "skybox", pipeline);
+    initVKPipeline(vk, "skybox", brush.pipeline);
+    VulkanSampler sampler;
+    uploadTextures(vk, sampler);
     uploadVertexDataFromObj(vk, "models/skybox.obj", brush.mesh);
-    uploadTextures(vk, brush);
-    updateDescriptorSet(vk, brush, pipeline);
+    updateDescriptorSet(vk, brush.pipeline, sampler);
     auto count = vk.swap.images.size();
-    createCommandBuffers(vk.device, vk.cmdPool, count, brush.cmds);
-    recordCommandBuffers(vk, brush, pipeline);
 }

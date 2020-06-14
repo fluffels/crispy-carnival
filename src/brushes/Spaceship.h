@@ -2,8 +2,9 @@
 
 #include <vector>
 
+#include "Brush.h"
 #include "Vulkan.h"
 
 using std::vector;
 
-void initSpaceship(Vulkan&, vector<VkCommandBuffer>&);
+void initSpaceship(Vulkan&, Brush&);

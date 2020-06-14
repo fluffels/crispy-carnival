@@ -140,13 +140,10 @@ WinMain(
     vk.swap.surface = getSurface(window, instance, vk.handle);
     initVK(vk);
 
-    // Brush skybox;
-    // initBrush(vk, skybox);
-
-    vector<vector<VkCommandBuffer>> cmdss;
-    // cmdss.push_back(skybox.cmds);
-    auto& spaceShipCmds = cmdss.emplace_back();
-    initSpaceship(vk, spaceShipCmds);
+    Brush skybox;
+    initBrush(vk, skybox);
+    Brush spaceShip;
+    initSpaceship(vk, spaceShip);
 
     int errorCode = 0;
 
@@ -188,7 +185,7 @@ WinMain(
             QueryPerformanceCounter(&frameStart);
                 auto mvp = camera.get();
                 updateMVP(vk, &mvp, sizeof(mvp));
-                present(vk, cmdss);
+                // present(vk, cmdss);
             QueryPerformanceCounter(&frameEnd);
             frameDelta = frameEnd.QuadPart - frameStart.QuadPart;
             float s = (float)frameDelta / counterFrequency.QuadPart;
