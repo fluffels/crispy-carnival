@@ -11,7 +11,7 @@ void updateMVP(Vulkan& vk, void* data, size_t length) {
     unMapMemory(vk.device, vk.mvp.memory);
 }
 
-void present(Vulkan& vk, vector<vector<VkCommandBuffer>>& cmdBuffers) {
+void present(Vulkan& vk, vector<VkCommandBuffer>& cmds) {
     uint32_t imageIndex = 0;
     auto result = vkAcquireNextImageKHR(
         vk.device,
@@ -31,15 +31,10 @@ void present(Vulkan& vk, vector<vector<VkCommandBuffer>>& cmdBuffers) {
         throw std::runtime_error("could not acquire next image");
     }
 
-    vector<VkCommandBuffer> cmdHandles;
-    for (auto& cmdBuffer: cmdBuffers) {
-        cmdHandles.push_back(cmdBuffer[imageIndex]);
-    }
-
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = cmdHandles.size();
-    submitInfo.pCommandBuffers = cmdHandles.data();
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &cmds[imageIndex];
     submitInfo.waitSemaphoreCount = 1;
     submitInfo.pWaitSemaphores = &vk.swap.imageReady;
     VkPipelineStageFlags waitStages[] = {
