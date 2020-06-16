@@ -1,5 +1,10 @@
 # spicy-carnival
 
+Goals for this project:
+* implement skybox
+* manage multiple shaders in a good way
+* refactor Vulkan code a bit
+
 You'll need a cube map to put under `textures/` in the form of 6 `.png` images:
 * `nx.png`: negative x
 * `px.png`: positive x --- to the right
