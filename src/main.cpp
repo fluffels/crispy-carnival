@@ -193,17 +193,10 @@ WinMain(
             &skybox.mesh.vBuff.handle,
             offsets
         );
-        vkCmdBindIndexBuffer(
-            cmd,
-            skybox.mesh.iBuff.handle,
-            0,
-            VK_INDEX_TYPE_UINT32
-        );
-        vkCmdDrawIndexed(
+        vkCmdDraw(
             cmd,
             skybox.mesh.idxCount, 1,
-            0, 0,
-            0
+            0, 0
         );
 
         vkCmdBindPipeline(
@@ -227,17 +220,10 @@ WinMain(
             &spaceShip.mesh.vBuff.handle,
             offsets
         );
-        vkCmdBindIndexBuffer(
-            cmd,
-            spaceShip.mesh.iBuff.handle,
-            0,
-            VK_INDEX_TYPE_UINT32
-        );
-        vkCmdDrawIndexed(
+        vkCmdDraw(
             cmd,
             spaceShip.mesh.idxCount, 1,
-            0, 0,
-            0
+            0, 0
         );
 
         vkCmdEndRenderPass(cmd);

@@ -38,22 +38,34 @@ void loadObj(char* filename, attrib_t& attrib, vector<shape_t>& shapes) {
     }
 }
 
-void uploadVertexData(Vulkan& vk, Mesh& mesh, attrib_t& attrib) {
-    uint32_t count = attrib.vertices.size() / 3;
-    vector<Vertex> vertices(count);
-    for (uint32_t i = 0; i < count; i++) {
-        uint32_t texIdx = 2 * i;
-        uint32_t vertIdx = 3 * i;
-        vertices[i].pos.x = attrib.vertices[vertIdx + 0];
-        vertices[i].pos.y = attrib.vertices[vertIdx + 1];
-        vertices[i].pos.z = attrib.vertices[vertIdx + 2];
-        if (texIdx < attrib.texcoords.size()) {
-            vertices[i].uv.x = attrib.texcoords[texIdx + 0];
-            vertices[i].uv.y = attrib.texcoords[texIdx + 1];
+void uploadVertexData(
+    Vulkan& vk,
+    Mesh& mesh,
+    attrib_t& attrib,
+    vector<shape_t>& shapes
+) {
+    vector<Vertex> vertices;
+
+    vector<uint32_t> indices;
+    for (auto& shape: shapes) {
+        auto& mesh = shape.mesh;
+
+        for (auto& index: mesh.indices) {
+            auto& vertex = vertices.emplace_back();
+
+            auto vertIndex = index.vertex_index * 3;
+            auto texIndex = index.texcoord_index * 2;
+            vertex.pos.x = attrib.vertices[vertIndex + 0];
+            vertex.pos.y = attrib.vertices[vertIndex + 1];
+            vertex.pos.z = attrib.vertices[vertIndex + 2];
+            if (texIndex < attrib.texcoords.size()) {
+                vertex.uv.s = attrib.texcoords[texIndex + 0];
+                vertex.uv.t = attrib.texcoords[texIndex + 1];
+            }
         }
     }
 
-    uint32_t size = sizeof(Vertex) * count;
+    uint32_t size = sizeof(Vertex) * vertices.size();
 
     createVertexBuffer(
         vk.device, vk.memories, vk.queueFamily, size, mesh.vBuff
@@ -62,32 +74,13 @@ void uploadVertexData(Vulkan& vk, Mesh& mesh, attrib_t& attrib) {
     void* dst = mapMemory(vk.device, mesh.vBuff.handle, mesh.vBuff.memory);
         memcpy(dst, vertices.data(), size);
     unMapMemory(vk.device, mesh.vBuff.memory);
-}
 
-void uploadIndexData(Vulkan& vk, Mesh& mesh, vector<shape_t>& shapes) {
-    vector<uint32_t> indices;
-    for (auto& shape: shapes) {
-        for (auto& index: shape.mesh.indices) {
-            indices.push_back(index.vertex_index);
-        }
-    }
-
-    mesh.idxCount = indices.size();
-    uint32_t size = indices.size() * sizeof(uint32_t);
-
-    createIndexBuffer(
-        vk.device, vk.memories, vk.queueFamily, size, mesh.iBuff
-    );
-
-    void* dst = mapMemory(vk.device, mesh.iBuff.handle, mesh.iBuff.memory);
-        memcpy(dst, indices.data(), size);
-    unMapMemory(vk.device, mesh.iBuff.memory);
+    mesh.idxCount = vertices.size();
 }
 
 void uploadVertexDataFromObj(Vulkan& vk, char* filename, Mesh& mesh) {
     attrib_t attrib;
     vector<shape_t> shapes;
     loadObj(filename, attrib, shapes);
-    uploadVertexData(vk, mesh, attrib);
-    uploadIndexData(vk, mesh, shapes);
+    uploadVertexData(vk, mesh, attrib, shapes);
 }
