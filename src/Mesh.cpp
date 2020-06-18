@@ -55,12 +55,19 @@ void uploadVertexData(
 
             auto vertIndex = index.vertex_index * 3;
             auto texIndex = index.texcoord_index * 2;
+            auto normalIndex = index.normal_index * 3;
+
             vertex.pos.x = attrib.vertices[vertIndex + 0];
             vertex.pos.y = attrib.vertices[vertIndex + 1];
             vertex.pos.z = attrib.vertices[vertIndex + 2];
             if (texIndex < attrib.texcoords.size()) {
                 vertex.uv.s = attrib.texcoords[texIndex + 0];
                 vertex.uv.t = attrib.texcoords[texIndex + 1];
+            }
+            if (normalIndex < attrib.normals.size()) {
+                vertex.normal.x = attrib.texcoords[normalIndex + 0];
+                vertex.normal.y = attrib.texcoords[normalIndex + 1];
+                vertex.normal.z = attrib.texcoords[normalIndex + 2];
             }
         }
     }

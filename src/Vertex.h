@@ -11,6 +11,7 @@ class Vertex {
     public:
         glm::vec3 pos;
         glm::vec3 uv;
+        glm::vec3 normal;
 
         static VkVertexInputBindingDescription
         getInputBindingDescription();

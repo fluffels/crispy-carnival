@@ -33,5 +33,15 @@ getInputAttributeDescriptions() {
         attrs.push_back(attr);
     }
 
+    {
+        VkVertexInputAttributeDescription attr = {};
+        attr.binding = 0;
+        attr.location = attrs.size();
+        attr.format = VK_FORMAT_R32G32B32_SFLOAT;
+        attr.offset = offsetof(Vertex, normal);
+        attrs.push_back(attr);
+    }
+
+
     return attrs;
 }
