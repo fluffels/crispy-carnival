@@ -65,9 +65,9 @@ void uploadVertexData(
                 vertex.uv.t = attrib.texcoords[texIndex + 1];
             }
             if (normalIndex < attrib.normals.size()) {
-                vertex.normal.x = attrib.texcoords[normalIndex + 0];
-                vertex.normal.y = attrib.texcoords[normalIndex + 1];
-                vertex.normal.z = attrib.texcoords[normalIndex + 2];
+                vertex.normal.x = attrib.normals[normalIndex + 0];
+                vertex.normal.y = attrib.normals[normalIndex + 1];
+                vertex.normal.z = attrib.normals[normalIndex + 2];
             }
         }
     }
