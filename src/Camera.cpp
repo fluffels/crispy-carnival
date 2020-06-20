@@ -11,10 +11,10 @@ using glm::vec4;
 
 #define PI 3.14159265358979323846f
 
-mat4 Camera::get() const {
-    auto view = lookAt(eye, at, up);
-    auto proj = perspective(fov, ar, nearz, farz);
-    auto mvp = proj * view;
+MVP Camera::get() const {
+    MVP mvp;
+    mvp.view = lookAt(eye, at, up);
+    mvp.proj = perspective(fov, ar, nearz, farz);
     return mvp;
 }
 

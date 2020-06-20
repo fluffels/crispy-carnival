@@ -6,6 +6,11 @@
 using glm::mat4;
 using glm::vec3;
 
+struct MVP {
+    mat4 view;
+    mat4 proj;
+};
+
 struct Camera {
     vec3 eye;
     vec3 at;
@@ -17,7 +22,7 @@ struct Camera {
     float nearz;
     float farz;
 
-    mat4 get() const;
+    MVP get() const;
 
     void setAR(uint32_t, uint32_t);
     void setFOV(float);
