@@ -14,6 +14,7 @@ using glm::vec4;
 MVP Camera::get() const {
     MVP mvp;
     mvp.view = lookAt(eye, at, up);
+    mvp.rot = lookAt(vec3(0, 0, 0), normalize(at - eye), up);
     mvp.proj = perspective(fov, ar, nearz, farz);
     return mvp;
 }

@@ -9,6 +9,7 @@ using glm::vec3;
 struct MVP {
     mat4 view;
     mat4 proj;
+    mat4 rot;
 };
 
 struct Camera {
