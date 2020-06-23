@@ -21,8 +21,10 @@ void loadObj(char* filename, attrib_t& attrib, vector<shape_t>& shapes) {
     string warn;
     string err;
 
+    vector<tinyobj::material_t> materials;
+
     bool ret = LoadObj(
-        &attrib, &shapes, nullptr, &warn, &err, filename
+        &attrib, &shapes, &materials, &warn, &err, filename, "models/"
     );
 
     if (!warn.empty()) {
