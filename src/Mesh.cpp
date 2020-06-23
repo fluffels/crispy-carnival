@@ -14,14 +14,18 @@ using std::string;
 using std::vector;
 
 using tinyobj::attrib_t;
+using tinyobj::material_t;
 using tinyobj::shape_t;
 using tinyobj::LoadObj;
 
-void loadObj(char* filename, attrib_t& attrib, vector<shape_t>& shapes) {
+void loadObj(
+    char* filename,
+    attrib_t& attrib,
+    vector<shape_t>& shapes,
+    vector<material_t>& materials
+) {
     string warn;
     string err;
-
-    vector<tinyobj::material_t> materials;
 
     bool ret = LoadObj(
         &attrib, &shapes, &materials, &warn, &err, filename, "models/"
@@ -90,6 +94,7 @@ void uploadVertexData(
 void uploadVertexDataFromObj(Vulkan& vk, char* filename, Mesh& mesh) {
     attrib_t attrib;
     vector<shape_t> shapes;
-    loadObj(filename, attrib, shapes);
+    vector<material_t> materials;
+    loadObj(filename, attrib, shapes, materials);
     uploadVertexData(vk, mesh, attrib, shapes);
 }
