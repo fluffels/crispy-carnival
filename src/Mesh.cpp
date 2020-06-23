@@ -18,17 +18,25 @@ using tinyobj::material_t;
 using tinyobj::shape_t;
 using tinyobj::LoadObj;
 
+struct Obj {
+    attrib_t attrib;
+    vector<shape_t> shapes;
+    vector<material_t> materials;
+};
+
 void loadObj(
     char* filename,
-    attrib_t& attrib,
-    vector<shape_t>& shapes,
-    vector<material_t>& materials
+    Obj& obj
 ) {
     string warn;
     string err;
 
     bool ret = LoadObj(
-        &attrib, &shapes, &materials, &warn, &err, filename, "models/"
+        &obj.attrib,
+        &obj.shapes,
+        &obj.materials,
+        &warn, &err,
+        filename, "models/"
     );
 
     if (!warn.empty()) {
@@ -47,13 +55,12 @@ void loadObj(
 void uploadVertexData(
     Vulkan& vk,
     Mesh& mesh,
-    attrib_t& attrib,
-    vector<shape_t>& shapes
+    Obj& obj
 ) {
     vector<Vertex> vertices;
 
     vector<uint32_t> indices;
-    for (auto& shape: shapes) {
+    for (auto& shape: obj.shapes) {
         auto& mesh = shape.mesh;
 
         for (auto& index: mesh.indices) {
@@ -63,17 +70,17 @@ void uploadVertexData(
             auto texIndex = index.texcoord_index * 2;
             auto normalIndex = index.normal_index * 3;
 
-            vertex.pos.x = attrib.vertices[vertIndex + 0];
-            vertex.pos.y = attrib.vertices[vertIndex + 1];
-            vertex.pos.z = attrib.vertices[vertIndex + 2];
-            if (texIndex < attrib.texcoords.size()) {
-                vertex.uv.s = attrib.texcoords[texIndex + 0];
-                vertex.uv.t = attrib.texcoords[texIndex + 1];
+            vertex.pos.x = obj.attrib.vertices[vertIndex + 0];
+            vertex.pos.y = obj.attrib.vertices[vertIndex + 1];
+            vertex.pos.z = obj.attrib.vertices[vertIndex + 2];
+            if (texIndex < obj.attrib.texcoords.size()) {
+                vertex.uv.s = obj.attrib.texcoords[texIndex + 0];
+                vertex.uv.t = obj.attrib.texcoords[texIndex + 1];
             }
-            if (normalIndex < attrib.normals.size()) {
-                vertex.normal.x = attrib.normals[normalIndex + 0];
-                vertex.normal.y = attrib.normals[normalIndex + 1];
-                vertex.normal.z = attrib.normals[normalIndex + 2];
+            if (normalIndex < obj.attrib.normals.size()) {
+                vertex.normal.x = obj.attrib.normals[normalIndex + 0];
+                vertex.normal.y = obj.attrib.normals[normalIndex + 1];
+                vertex.normal.z = obj.attrib.normals[normalIndex + 2];
             }
         }
     }
@@ -92,9 +99,7 @@ void uploadVertexData(
 }
 
 void uploadVertexDataFromObj(Vulkan& vk, char* filename, Mesh& mesh) {
-    attrib_t attrib;
-    vector<shape_t> shapes;
-    vector<material_t> materials;
-    loadObj(filename, attrib, shapes, materials);
-    uploadVertexData(vk, mesh, attrib, shapes);
+    Obj obj;
+    loadObj(filename, obj);
+    uploadVertexData(vk, mesh, obj);
 }
