@@ -193,7 +193,7 @@ void initBrush(Vulkan& vk, Brush& brush) {
     initVKPipeline(vk, "skybox", brush.pipeline);
     VulkanSampler sampler;
     uploadTextures(vk, sampler);
-    uploadVertexDataFromObj(vk, "models/skybox.obj", brush.mesh);
+    uploadVertexDataFromObj(vk, brush, "models/skybox.obj");
     updateDescriptorSet(vk, brush.pipeline, sampler);
     auto count = vk.swap.images.size();
 }

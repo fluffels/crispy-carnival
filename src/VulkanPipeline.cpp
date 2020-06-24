@@ -153,6 +153,33 @@ void createPipelineLayout(Vulkan& vk, VulkanPipeline& pipeline) {
     ));
 }
 
+void describeInputAttributes(
+    VulkanPipeline& pipeline,
+    VulkanShader& shader
+) {
+    uint32_t count = 0;
+    spvReflectEnumerateInputVariables(&shader.reflect, &count, nullptr);
+    vector<SpvReflectInterfaceVariable*> inputs(count);
+    spvReflectEnumerateInputVariables(&shader.reflect, &count, inputs.data());
+
+    pipeline.inputBinding.stride = 0;
+    for (auto input: inputs) {
+        if (strcmp("inUV", input->name) == 0) {
+            pipeline.needsTexCoords = true;
+        } else if (strcmp("inNormal", input->name) == 0) {
+            pipeline.needsNormals = true;
+        }
+
+        auto& desc = pipeline.inputAttributes.emplace_back();
+        desc.binding = 0;
+        desc.location = input->location;
+        desc.format = (VkFormat)input->format;
+        desc.offset = pipeline.inputBinding.stride;
+        pipeline.inputBinding.stride += input->numeric.scalar.width / 8 *
+            input->numeric.vector.component_count;
+    }
+}
+
 void createPipeline(
     Vulkan& vk,
     VulkanShader& vert,
@@ -177,17 +204,22 @@ void createPipeline(
         shaderStages.push_back(fragStage);
     }
 
-    auto inputBinding = Vertex::getInputBindingDescription();
-    auto inputAttributes = Vertex::getInputAttributeDescriptions();
+    pipeline.inputBinding.binding = 0;
+    pipeline.inputBinding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+    describeInputAttributes(
+        pipeline,
+        vert
+    );
 
     VkPipelineVertexInputStateCreateInfo vertexInput = {};
     vertexInput.sType =
         VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
     vertexInput.vertexBindingDescriptionCount = 1;
-    vertexInput.pVertexBindingDescriptions = &inputBinding;
+    vertexInput.pVertexBindingDescriptions = &pipeline.inputBinding;
     vertexInput.vertexAttributeDescriptionCount =
-        (uint32_t)inputAttributes.size();
-    vertexInput.pVertexAttributeDescriptions = inputAttributes.data();
+        (uint32_t)pipeline.inputAttributes.size();
+    vertexInput.pVertexAttributeDescriptions = pipeline.inputAttributes.data();
     
     VkPipelineInputAssemblyStateCreateInfo assembly = {};
     assembly.sType =

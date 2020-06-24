@@ -6,8 +6,8 @@
 
 #include "stb_image.h"
 
+#include "Brush.h"
 #include "FileSystem.h"
-#include "Mesh.h"
 #include "Spaceship.h"
 #include "util.h"
 #include "Vertex.h"
@@ -175,6 +175,6 @@ void initSpaceship(Vulkan& vk, Brush& brush) {
     initVKPipeline(vk, "spaceship", brush.pipeline);
     VulkanSampler sampler;
     uploadTexture(vk, "textures/spaceship.png", sampler);
-    uploadVertexDataFromObj(vk, "models/viper.obj", brush.mesh);
+    uploadVertexDataFromObj(vk, brush, "models/viper.obj");
     updateDescriptorSetSpaceShip(vk, brush.pipeline, sampler);
 }

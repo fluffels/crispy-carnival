@@ -11,6 +11,10 @@ struct VulkanPipeline {
     VkDescriptorSetLayout descriptorLayout;
     VkDescriptorPool descriptorPool;
     VkDescriptorSet descriptorSet;
+    VkVertexInputBindingDescription inputBinding;
+    vector<VkVertexInputAttributeDescription> inputAttributes;
+    bool needsTexCoords;
+    bool needsNormals;
 };
 
 void initVKPipeline(Vulkan& vk, char* name, VulkanPipeline& pipeline);

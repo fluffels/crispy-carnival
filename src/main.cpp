@@ -142,8 +142,8 @@ WinMain(
     vk.swap.surface = getSurface(window, instance, vk.handle);
     initVK(vk);
 
-    Brush planet;
-    uploadVertexDataFromObj(vk, "models/Planet_Sandy.obj", planet.mesh);
+    // Brush planet;
+    // uploadVertexDataFromObj(vk, "models/Planet_Sandy.obj", planet.mesh);
 
     Brush skybox;
     initBrush(vk, skybox);

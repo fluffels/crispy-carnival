@@ -7,7 +7,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
-#include "Mesh.h"
+#include "Brush.h"
 #include "Vertex.h"
 
 using std::string;
@@ -54,52 +54,66 @@ void loadObj(
 
 void uploadVertexData(
     Vulkan& vk,
-    Mesh& mesh,
+    Brush& brush,
     Obj& obj
 ) {
-    vector<Vertex> vertices;
+    auto& pipeline = brush.pipeline;
+    auto& attributes = pipeline.inputAttributes;
+    auto stride = pipeline.inputBinding.stride;
 
-    vector<uint32_t> indices;
+    auto count = 0;
     for (auto& shape: obj.shapes) {
         auto& mesh = shape.mesh;
+        count += mesh.indices.size();
+    }
+    auto size = count * stride;
+    float* vertices = (float*)malloc(size);
+    float* vertex = vertices;
 
+    for (auto& shape: obj.shapes) {
+        auto& mesh = shape.mesh;
+        
         for (auto& index: mesh.indices) {
-            auto& vertex = vertices.emplace_back();
-
             auto vertIndex = index.vertex_index * 3;
             auto texIndex = index.texcoord_index * 2;
             auto normalIndex = index.normal_index * 3;
 
-            vertex.pos.x = obj.attrib.vertices[vertIndex + 0];
-            vertex.pos.y = obj.attrib.vertices[vertIndex + 1];
-            vertex.pos.z = obj.attrib.vertices[vertIndex + 2];
-            if (texIndex < obj.attrib.texcoords.size()) {
-                vertex.uv.s = obj.attrib.texcoords[texIndex + 0];
-                vertex.uv.t = obj.attrib.texcoords[texIndex + 1];
+            *vertex++ = obj.attrib.vertices[vertIndex + 0];
+            *vertex++ = obj.attrib.vertices[vertIndex + 1];
+            *vertex++ = obj.attrib.vertices[vertIndex + 2];
+            if (pipeline.needsTexCoords &&
+                    (texIndex < obj.attrib.texcoords.size())) {
+                *vertex++ = obj.attrib.texcoords[texIndex + 0];
+                *vertex++ = obj.attrib.texcoords[texIndex + 1];
             }
-            if (normalIndex < obj.attrib.normals.size()) {
-                vertex.normal.x = obj.attrib.normals[normalIndex + 0];
-                vertex.normal.y = obj.attrib.normals[normalIndex + 1];
-                vertex.normal.z = obj.attrib.normals[normalIndex + 2];
+            if (pipeline.needsNormals &&
+                    (normalIndex < obj.attrib.normals.size())) {
+                *vertex++ = obj.attrib.normals[normalIndex + 0];
+                *vertex++ = obj.attrib.normals[normalIndex + 1];
+                *vertex++ = obj.attrib.normals[normalIndex + 2];
             }
         }
     }
 
-    uint32_t size = sizeof(Vertex) * vertices.size();
-
     createVertexBuffer(
-        vk.device, vk.memories, vk.queueFamily, size, mesh.vBuff
+        vk.device, vk.memories, vk.queueFamily, size, brush.mesh.vBuff
     );
 
-    void* dst = mapMemory(vk.device, mesh.vBuff.handle, mesh.vBuff.memory);
-        memcpy(dst, vertices.data(), size);
-    unMapMemory(vk.device, mesh.vBuff.memory);
+    void* dst = mapMemory(vk.device, brush.mesh.vBuff.handle, brush.mesh.vBuff.memory);
+        memcpy(dst, vertices, size);
+    unMapMemory(vk.device, brush.mesh.vBuff.memory);
 
-    mesh.idxCount = vertices.size();
+    brush.mesh.idxCount = count;
+
+    free(vertices);
 }
 
-void uploadVertexDataFromObj(Vulkan& vk, char* filename, Mesh& mesh) {
+void uploadVertexDataFromObj(
+    Vulkan& vk,
+    Brush& brush,
+    char* filename
+) {
     Obj obj;
     loadObj(filename, obj);
-    uploadVertexData(vk, mesh, obj);
+    uploadVertexData(vk, brush, obj);
 }
