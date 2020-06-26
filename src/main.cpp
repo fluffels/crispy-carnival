@@ -146,7 +146,18 @@ WinMain(
     // uploadVertexDataFromObj(vk, "models/Planet_Sandy.obj", planet.mesh);
 
     Brush skybox;
-    initBrush(vk, skybox);
+
+    {
+        LARGE_INTEGER start, end;
+        int64_t delta;
+        QueryPerformanceCounter(&start);
+        initBrush(vk, skybox);
+        QueryPerformanceCounter(&end);
+        delta = end.QuadPart - start.QuadPart;
+        float s = (float)delta / counterFrequency.QuadPart;
+        LOG(INFO) << "loading skybox took: " << s;
+    }
+
     Brush spaceShip;
     initSpaceship(vk, spaceShip);
 
