@@ -6,6 +6,7 @@
 
 #include "stb_image.h"
 
+#include "BMP.h"
 #include "FileSystem.h"
 #include "Brush.h"
 #include "util.h"
@@ -68,18 +69,19 @@ void uploadTextures(Vulkan& vk, VulkanSampler& sampler) {
     VkExtent2D extent;
 
     vector<string> fnames = {
-        "textures/xn.png",
-        "textures/xp.png",
-        "textures/yn.png",
-        "textures/yp.png",
-        "textures/zn.png",
-        "textures/zp.png",
+        "textures/xn.bmp",
+        "textures/xn.bmp",
+        "textures/xn.bmp",
+        "textures/xn.bmp",
+        "textures/xn.bmp",
+        "textures/xn.bmp",
     };
     vector<VulkanBuffer> stagingBuffers;
     for (auto& fname: fnames) {
-        int32_t x, y, n;
-        uint8_t* data = stbi_load(fname.c_str(), &x, &y, &n, 4);
-        extent = {(uint32_t)x, (uint32_t)y};
+        uint32_t x, y;
+        uint8_t* data;
+        loadBMP(data, fname.c_str(), x, y);
+        extent = {x, y};
         auto size = x * y * 4;
 
         auto& staging = stagingBuffers.emplace_back();
