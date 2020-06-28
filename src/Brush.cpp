@@ -6,9 +6,9 @@
 
 #include "stb_image.h"
 
-#include "BMP.h"
-#include "FileSystem.h"
 #include "Brush.h"
+#include "ImageDecoder.h"
+#include "FileSystem.h"
 #include "util.h"
 #include "Vertex.h"
 #include "VulkanCommandBuffer.h"
@@ -69,20 +69,18 @@ void uploadTextures(Vulkan& vk, VulkanSampler& sampler) {
     VkExtent2D extent;
 
     vector<string> fnames = {
-        "textures/xn.bmp",
-        "textures/xn.bmp",
-        "textures/xn.bmp",
-        "textures/xn.bmp",
-        "textures/xn.bmp",
-        "textures/xn.bmp",
+        "textures/xn.png.dat",
+        "textures/xp.png.dat",
+        "textures/yn.png.dat",
+        "textures/yp.png.dat",
+        "textures/zn.png.dat",
+        "textures/zp.png.dat"
     };
     vector<VulkanBuffer> stagingBuffers;
     for (auto& fname: fnames) {
-        uint32_t x, y;
-        uint8_t* data;
-        loadBMP(data, fname.c_str(), x, y);
-        extent = {x, y};
-        auto size = x * y * 4;
+        Image image = loadImage(fname.c_str());
+        extent = {image.header.width, image.header.height};
+        auto size = extent.width * extent.height * 4;
 
         auto& staging = stagingBuffers.emplace_back();
         createStagingBuffer(
@@ -94,7 +92,7 @@ void uploadTextures(Vulkan& vk, VulkanSampler& sampler) {
         );
 
         void* dst = mapMemory(vk.device, staging.handle, staging.memory);
-            memcpy(dst, data, size);
+            memcpy(dst, image.data, size);
         unMapMemory(vk.device, staging.memory);
     }
     sampler = createVulkanSamplerCube(

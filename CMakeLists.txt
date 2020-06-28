@@ -36,7 +36,7 @@ add_executable (
     src/Controller.cpp
     src/DirectInput.cpp
     src/FileSystem.cpp
-    src/BMP.cpp
+    src/ImageDecoder.cpp
     src/Brush.cpp
     src/Mesh.cpp
     src/Mouse.cpp
