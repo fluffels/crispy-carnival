@@ -41,6 +41,7 @@ add_executable (
     src/Mesh.cpp
     src/Mouse.cpp
     src/Present.cpp
+    src/Texture.cpp
     src/Vertex.cpp
     src/Vulkan.cpp
     src/VulkanBuffer.cpp
