@@ -71,5 +71,4 @@ void initBrush(Vulkan& vk, Brush& brush) {
     uploadTextureCube(vk, sampler);
     uploadVertexDataFromObj(vk, brush, "models/skybox.obj");
     updateDescriptorSet(vk, brush.pipeline, sampler);
-    auto count = vk.swap.images.size();
 }
