@@ -1,5 +1,7 @@
 #pragma once
 
+#include <inttypes.h>
+
 #pragma pack (push, 1)
 struct Header {
     uint32_t width;
