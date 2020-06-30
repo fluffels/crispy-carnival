@@ -2,8 +2,9 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 layout(binding=0) uniform Uniform {
-    mat4x4 view;
     mat4x4 proj;
+    mat4x4 view;
+    mat4x4 model;
     mat4x4 rot;
 } uniforms;
 
