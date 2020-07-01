@@ -16,6 +16,7 @@ INITIALIZE_EASYLOGGINGPP
 #include "Camera.h"
 #include "DirectInput.h"
 #include "Present.h"
+#include "Render.h"
 #include "Vulkan.h"
 
 using std::exception;
