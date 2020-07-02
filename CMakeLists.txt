@@ -37,7 +37,6 @@ add_executable (
     src/DirectInput.cpp
     src/FileSystem.cpp
     src/ImageDecoder.cpp
-    src/Brush.cpp
     src/Mesh.cpp
     src/Mouse.cpp
     src/Present.cpp
@@ -52,7 +51,6 @@ add_executable (
     src/VulkanPipeline.cpp
     src/VulkanSwapChain.cpp
     src/VulkanSynch.cpp
-    src/brushes/Spaceship.cpp
 )
 target_link_libraries(
     main

@@ -11,8 +11,6 @@
 #include "easylogging++.h"
 INITIALIZE_EASYLOGGINGPP
 
-#include "Brush.h"
-#include "brushes/Spaceship.h"
 #include "Camera.h"
 #include "DirectInput.h"
 #include "Present.h"
@@ -143,108 +141,8 @@ WinMain(
     vk.swap.surface = getSurface(window, instance, vk.handle);
     initVK(vk);
 
-    // Brush planet;
-    // uploadVertexDataFromObj(vk, "models/Planet_Sandy.obj", planet.mesh);
-
-    Brush skybox;
-
-    {
-        LARGE_INTEGER start, end;
-        int64_t delta;
-        QueryPerformanceCounter(&start);
-        initBrush(vk, skybox);
-        QueryPerformanceCounter(&end);
-        delta = end.QuadPart - start.QuadPart;
-        float s = (float)delta / counterFrequency.QuadPart;
-        LOG(INFO) << "loading skybox took: " << s;
-    }
-
-    Brush spaceShip;
-    initSpaceship(vk, spaceShip);
-
-    uint32_t framebufferCount = vk.swap.images.size();
-    vector<VkCommandBuffer> cmds(framebufferCount);
-    createCommandBuffers(vk.device, vk.cmdPool, framebufferCount, cmds);
-    for (size_t swapIdx = 0; swapIdx < framebufferCount; swapIdx++) {
-        auto& cmd = cmds[swapIdx];
-        beginFrameCommandBuffer(cmd);
-
-        VkClearValue colorClear;
-        colorClear.color = {1.f, 1.f, 1.f, 1.f};
-        VkClearValue depthClear;
-        depthClear.depthStencil = { 1.f, 0 };
-        VkClearValue clears[] = { colorClear, depthClear };
-
-        VkRenderPassBeginInfo beginInfo = {};
-        beginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        beginInfo.clearValueCount = 2;
-        beginInfo.pClearValues = clears;
-        beginInfo.framebuffer = vk.swap.framebuffers[swapIdx];
-        beginInfo.renderArea.extent = vk.swap.extent;
-        beginInfo.renderArea.offset = {0, 0};
-        beginInfo.renderPass = vk.renderPass;
-
-        vkCmdBeginRenderPass(cmd, &beginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-        vkCmdBindPipeline(
-            cmd,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            skybox.pipeline.handle
-        );
-        vkCmdBindDescriptorSets(
-            cmd,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            skybox.pipeline.layout,
-            0,
-            1,
-            &skybox.pipeline.descriptorSet,
-            0,
-            nullptr
-        );
-        VkDeviceSize offsets[] = {0};
-        vkCmdBindVertexBuffers(
-            cmd,
-            0, 1,
-            &skybox.mesh.vBuff.handle,
-            offsets
-        );
-        vkCmdDraw(
-            cmd,
-            skybox.mesh.idxCount, 1,
-            0, 0
-        );
-
-        vkCmdBindPipeline(
-            cmd,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            spaceShip.pipeline.handle
-        );
-        vkCmdBindDescriptorSets(
-            cmd,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            spaceShip.pipeline.layout,
-            0,
-            1,
-            &spaceShip.pipeline.descriptorSet,
-            0,
-            nullptr
-        );
-        vkCmdBindVertexBuffers(
-            cmd,
-            0, 1,
-            &spaceShip.mesh.vBuff.handle,
-            offsets
-        );
-        vkCmdDraw(
-            cmd,
-            spaceShip.mesh.idxCount, 1,
-            0, 0
-        );
-
-        vkCmdEndRenderPass(cmd);
-
-        checkSuccess(vkEndCommandBuffer(cmd));
-    }
+    vector<VkCommandBuffer> cmds;
+    recordCommandBuffers(vk, cmds);
 
     int errorCode = 0;
 

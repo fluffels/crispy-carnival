@@ -7,8 +7,9 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
-#include "Brush.h"
+#include "Mesh.h"
 #include "Vertex.h"
+#include "Vulkan.h"
 
 using std::string;
 using std::vector;
@@ -54,26 +55,23 @@ void loadObj(
 
 void uploadVertexData(
     Vulkan& vk,
-    Brush& brush,
-    Obj& obj
+    VulkanPipeline& pipeline,
+    Obj& obj,
+    Mesh& mesh
 ) {
-    auto& pipeline = brush.pipeline;
     auto& attributes = pipeline.inputAttributes;
     auto stride = pipeline.inputBinding.stride;
 
     auto count = 0;
     for (auto& shape: obj.shapes) {
-        auto& mesh = shape.mesh;
-        count += mesh.indices.size();
+        count += shape.mesh.indices.size();
     }
     auto size = count * stride;
     float* vertices = (float*)malloc(size);
     float* vertex = vertices;
 
     for (auto& shape: obj.shapes) {
-        auto& mesh = shape.mesh;
-        
-        for (auto& index: mesh.indices) {
+        for (auto& index: shape.mesh.indices) {
             auto vertIndex = index.vertex_index * 3;
             auto texIndex = index.texcoord_index * 2;
             auto normalIndex = index.normal_index * 3;
@@ -96,24 +94,25 @@ void uploadVertexData(
     }
 
     createVertexBuffer(
-        vk.device, vk.memories, vk.queueFamily, size, brush.mesh.vBuff
+        vk.device, vk.memories, vk.queueFamily, size, mesh.vBuff
     );
 
-    void* dst = mapMemory(vk.device, brush.mesh.vBuff.handle, brush.mesh.vBuff.memory);
+    void* dst = mapMemory(vk.device, mesh.vBuff.handle, mesh.vBuff.memory);
         memcpy(dst, vertices, size);
-    unMapMemory(vk.device, brush.mesh.vBuff.memory);
+    unMapMemory(vk.device, mesh.vBuff.memory);
 
-    brush.mesh.idxCount = count;
+    mesh.idxCount = count;
 
     free(vertices);
 }
 
 void uploadVertexDataFromObj(
     Vulkan& vk,
-    Brush& brush,
-    char* filename
+    VulkanPipeline& pipeline,
+    char* filename,
+    Mesh& mesh
 ) {
     Obj obj;
     loadObj(filename, obj);
-    uploadVertexData(vk, brush, obj);
+    uploadVertexData(vk, pipeline, obj, mesh);
 }

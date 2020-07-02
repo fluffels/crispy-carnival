@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Brush.h"
 #include "Vulkan.h"
 
 void present(Vulkan& vk, vector<VkCommandBuffer>& cmdBuffers);
