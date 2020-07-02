@@ -72,6 +72,9 @@ void recordCommandBuffers(Vulkan& vk, vector<VkCommandBuffer>& cmds) {
     uploadVertexDataFromObj(vk, spaceShip.pipeline, "models/viper.obj", spaceShip.mesh);
     updateDescriptorSet(vk, spaceShip.pipeline, spaceShip.sampler);
 
+    Brush planet;
+    initVKPipeline(vk, "planet", planet.pipeline);
+
     uint32_t framebufferCount = vk.swap.images.size();
     cmds.resize(framebufferCount);
     createCommandBuffers(vk.device, vk.cmdPool, framebufferCount, cmds);
