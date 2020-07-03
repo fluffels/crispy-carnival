@@ -15,6 +15,7 @@ struct VulkanPipeline {
     vector<VkVertexInputAttributeDescription> inputAttributes;
     bool needsTexCoords;
     bool needsNormals;
+    bool needsColor;
 };
 
 void initVKPipeline(Vulkan& vk, char* name, VulkanPipeline& pipeline);

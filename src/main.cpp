@@ -147,7 +147,7 @@ WinMain(
     int errorCode = 0;
 
     Camera camera;
-    camera.eye = {0, 0, -1};
+    camera.eye = {5, -5, -5};
     camera.at = {0, 0, 0};
     camera.up = {0, -1, 0};
     camera.setFOV(45);

@@ -168,6 +168,8 @@ void describeInputAttributes(
             pipeline.needsTexCoords = true;
         } else if (strcmp("inNormal", input->name) == 0) {
             pipeline.needsNormals = true;
+        } else if (strcmp("inColor", input->name) == 0) {
+            pipeline.needsColor = true;
         }
 
         auto& desc = pipeline.inputAttributes.emplace_back();
@@ -326,6 +328,8 @@ void createPipeline(
 }
 
 void initVKPipeline(Vulkan& vk, char* name, VulkanPipeline& pipeline) {
+    pipeline = {};
+
     vector<VulkanShader> shaders(2);
 
     char vertFile[255];

@@ -14,6 +14,36 @@ struct Brush {
 
 void updateDescriptorSet(
     Vulkan& vk,
+    VulkanPipeline& pipeline
+) {
+    VkDescriptorBufferInfo mvpBufferInfo;
+    mvpBufferInfo.buffer = vk.mvp.handle;
+    mvpBufferInfo.offset = 0;
+    mvpBufferInfo.range = VK_WHOLE_SIZE;
+
+    vector<VkWriteDescriptorSet> writeSets;
+
+    {
+        VkWriteDescriptorSet write = {};
+        write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        write.descriptorCount = 1;
+        write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        write.dstBinding = writeSets.size();
+        write.dstSet = pipeline.descriptorSet;
+        write.pBufferInfo = &mvpBufferInfo;
+        writeSets.push_back(write);
+    }
+
+    vkUpdateDescriptorSets(
+        vk.device,
+        writeSets.size(), writeSets.data(),
+        0,
+        nullptr
+    );
+}
+
+void updateDescriptorSet(
+    Vulkan& vk,
     VulkanPipeline& pipeline,
     VulkanSampler& sampler
 ) {
@@ -69,11 +99,23 @@ void recordCommandBuffers(Vulkan& vk, vector<VkCommandBuffer>& cmds) {
     Brush spaceShip;
     initVKPipeline(vk, "spaceship", spaceShip.pipeline);
     uploadTexture(vk, "textures/spaceship.png", spaceShip.sampler);
-    uploadVertexDataFromObj(vk, spaceShip.pipeline, "models/viper.obj", spaceShip.mesh);
+    uploadVertexDataFromObj(
+        vk,
+        spaceShip.pipeline,
+        "models/viper.obj",
+        spaceShip.mesh
+    );
     updateDescriptorSet(vk, spaceShip.pipeline, spaceShip.sampler);
 
     Brush planet;
     initVKPipeline(vk, "planet", planet.pipeline);
+    uploadVertexDataFromObj(
+        vk,
+        planet.pipeline,
+        "models/Planet_Sandy.obj",
+        planet.mesh
+    );
+    updateDescriptorSet(vk, planet.pipeline);
 
     uint32_t framebufferCount = vk.swap.images.size();
     cmds.resize(framebufferCount);
@@ -151,6 +193,33 @@ void recordCommandBuffers(Vulkan& vk, vector<VkCommandBuffer>& cmds) {
         vkCmdDraw(
             cmd,
             spaceShip.mesh.idxCount, 1,
+            0, 0
+        );
+
+        vkCmdBindPipeline(
+            cmd,
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            planet.pipeline.handle
+        );
+        vkCmdBindDescriptorSets(
+            cmd,
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            planet.pipeline.layout,
+            0,
+            1,
+            &planet.pipeline.descriptorSet,
+            0,
+            nullptr
+        );
+        vkCmdBindVertexBuffers(
+            cmd,
+            0, 1,
+            &planet.mesh.vBuff.handle,
+            offsets
+        );
+        vkCmdDraw(
+            cmd,
+            planet.mesh.idxCount, 1,
             0, 0
         );
 

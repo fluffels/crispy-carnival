@@ -73,12 +73,19 @@ void uploadVertexData(
     for (auto& shape: obj.shapes) {
         for (auto& index: shape.mesh.indices) {
             auto vertIndex = index.vertex_index * 3;
+            auto colorIndex = vertIndex;
             auto texIndex = index.texcoord_index * 2;
             auto normalIndex = index.normal_index * 3;
 
             *vertex++ = obj.attrib.vertices[vertIndex + 0];
             *vertex++ = obj.attrib.vertices[vertIndex + 1];
             *vertex++ = obj.attrib.vertices[vertIndex + 2];
+            if (pipeline.needsColor &&
+                    (colorIndex < obj.attrib.colors.size())) {
+                *vertex++ = obj.attrib.colors[colorIndex + 0];
+                *vertex++ = obj.attrib.colors[colorIndex + 1];
+                *vertex++ = obj.attrib.colors[colorIndex + 2];
+            }
             if (pipeline.needsTexCoords &&
                     (texIndex < obj.attrib.texcoords.size())) {
                 *vertex++ = obj.attrib.texcoords[texIndex + 0];
