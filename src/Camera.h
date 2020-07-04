@@ -18,13 +18,18 @@ struct Camera {
     vec3 at;
     vec3 up;
 
+    vec3 direction;
+    vec3 location;
+    vec3 velocity;
+
     float fov;
     float ar;
 
     float nearz;
     float farz;
 
-    MVP get() const;
+    MVP get();
+    void tick(float);
 
     void setAR(uint32_t, uint32_t);
     void setFOV(float);

@@ -147,6 +147,9 @@ WinMain(
     int errorCode = 0;
 
     Camera camera;
+    camera.direction = { 1, 0, 0 };
+    camera.location = { -15, 0, 0 };
+    camera.velocity = { 0, 0, 0 };
     camera.eye = {5, -5, -5};
     camera.at = {0, 0, 0};
     camera.up = {0, -1, 0};
@@ -188,6 +191,7 @@ WinMain(
             QueryPerformanceCounter(&frameEnd);
             frameDelta = frameEnd.QuadPart - frameStart.QuadPart;
             float s = (float)frameDelta / counterFrequency.QuadPart;
+            camera.tick(s);
             float fps = counterFrequency.QuadPart / (float)frameDelta;
             char buffer[255];
             sprintf_s(buffer, "%.2f FPS", fps);

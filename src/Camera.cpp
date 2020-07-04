@@ -7,16 +7,25 @@ using glm::lookAt;
 using glm::normalize;
 using glm::perspective;
 using glm::rotate;
+using glm::translate;
 using glm::vec4;
 
 #define PI 3.14159265358979323846f
 
-MVP Camera::get() const {
+MVP Camera::get() {
     MVP mvp;
+    at = location + vec3(0, 5, 0);
+    eye = at - vec3(15, -5, 0);
     mvp.view = lookAt(eye, at, up);
     mvp.rot = lookAt(vec3(0, 0, 0), normalize(at - eye), up);
     mvp.proj = perspective(fov, ar, nearz, farz);
+    mvp.model = mat4(1);
+    mvp.model = translate(mvp.model, location);
     return mvp;
+}
+
+void Camera::tick(float delta) {
+    location += velocity * delta;
 }
 
 void Camera::setAR(uint32_t w, uint32_t h) {
@@ -36,27 +45,21 @@ void Camera::left(float d) {
 }
 
 void Camera::forward(float d) {
-    auto forward = at - eye;
-    auto delta = forward * d;
-    eye += delta;
-    at += delta;
+    velocity += direction * d;
 }
 
 void Camera::right(float d) {
-    auto forward = at - eye;
-    auto right = normalize(cross(forward, up));
-    auto delta = right * d;
-    eye += delta;
-    at += delta;
+    auto right = normalize(cross(direction, up));
+    velocity += right * d;
 }
 
 void Camera::rotateY(float d) {
     vec3 f = at - eye;
-    vec4 forward = vec4(f, 0.0);
+    vec4 forward = vec4(direction, 0.0);
     mat4 rotation(1);
     rotation = rotate(rotation, PI * d * (1/180.f), up);
     forward = normalize(forward * rotation);
-    at = eye + vec3(forward);
+    direction = forward;
 }
 
 void Camera::rotateX(float d) {
