@@ -56,7 +56,7 @@ void Camera::right(float d) {
 }
 
 void Camera::rotateY(float d) {
-    rotation = rotate(rotation, PI * d * (1/180.f), up);
+    rotation = rotate(rotation, PI * d * (-1/180.f), up);
 }
 
 void Camera::rotateX(float d) {
