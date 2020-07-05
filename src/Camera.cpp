@@ -12,6 +12,8 @@ using glm::vec4;
 
 #define PI 3.14159265358979323846f
 
+Camera::Camera(): rotation(1) {}
+
 MVP Camera::get() {
     MVP mvp;
     at = location + vec3(0, 5, 0);
@@ -20,7 +22,7 @@ MVP Camera::get() {
     mvp.rot = lookAt(vec3(0, 0, 0), normalize(at - eye), up);
     mvp.proj = perspective(fov, ar, nearz, farz);
     mvp.model = mat4(1);
-    mvp.model = translate(mvp.model, location);
+    mvp.model = translate(mvp.model, location) * rotation;
     return mvp;
 }
 
@@ -54,20 +56,12 @@ void Camera::right(float d) {
 }
 
 void Camera::rotateY(float d) {
-    vec3 f = at - eye;
-    vec4 forward = vec4(direction, 0.0);
-    mat4 rotation(1);
     rotation = rotate(rotation, PI * d * (1/180.f), up);
-    forward = normalize(forward * rotation);
-    direction = forward;
 }
 
 void Camera::rotateX(float d) {
     vec3 f = at - eye;
     vec4 forward = vec4(f, 0.0);
-    mat4 rotation(1);
     auto right = normalize(cross(f, up));
     rotation = rotate(rotation, PI * d * (1/180.f), right);
-    forward = normalize(forward * rotation);
-    at = eye + vec3(forward);
 }
