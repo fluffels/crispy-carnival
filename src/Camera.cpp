@@ -17,7 +17,9 @@ Camera::Camera(): rotation(1) {}
 MVP Camera::get() {
     MVP mvp;
     at = location + vec3(0, 5, 0);
-    eye = at - vec3(15, -5, 0);
+    vec3 direction = rotation * vec4(1, 0, 0, 0);
+    vec3 offset = { direction.x * 15, direction.y * 15, direction.z * 15 };
+    eye = at - offset;
     mvp.view = lookAt(eye, at, up);
     mvp.rot = lookAt(vec3(0, 0, 0), normalize(at - eye), up);
     mvp.proj = perspective(fov, ar, nearz, farz);
@@ -60,8 +62,8 @@ void Camera::rotateY(float d) {
 }
 
 void Camera::rotateX(float d) {
-    vec3 f = at - eye;
-    vec4 forward = vec4(f, 0.0);
-    auto right = normalize(cross(f, up));
-    rotation = rotate(rotation, PI * d * (1/180.f), right);
+    // vec3 f = at - eye;
+    // vec4 forward = vec4(f, 0.0);
+    // auto right = normalize(cross(f, up));
+    // rotation = rotate(rotation, PI * d * (1/180.f), right);
 }
