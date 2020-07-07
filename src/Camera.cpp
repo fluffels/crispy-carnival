@@ -62,8 +62,7 @@ void Camera::rotateY(float d) {
 }
 
 void Camera::rotateX(float d) {
-    // vec3 f = at - eye;
-    // vec4 forward = vec4(f, 0.0);
-    // auto right = normalize(cross(f, up));
-    // rotation = rotate(rotation, PI * d * (1/180.f), right);
+    vec3 direction = rotation * vec4(1, 0, 0, 0);
+    auto right = normalize(cross(direction, up));
+    rotation = rotate(rotation, PI * d * (-1/180.f), right);
 }
