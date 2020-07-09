@@ -1,3 +1,6 @@
 [submodule "lib/SPIRV-Reflect"]
 	path = lib/SPIRV-Reflect
 	url = https://github.com/chaoticbob/SPIRV-Reflect.git
+[submodule "lib/glm"]
+	path = lib/glm
+	url = https://github.com/g-truc/glm.git

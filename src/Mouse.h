@@ -3,7 +3,7 @@
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 
-#include <glm/vec2.hpp>
+#include "glm/glm/vec2.hpp"
 
 using glm::ivec2;
 

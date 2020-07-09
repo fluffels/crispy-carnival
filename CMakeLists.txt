@@ -3,7 +3,6 @@ set (CMAKE_CXX_STANDARD 17)
 
 project (spicy-carnival)
 
-find_package(glm REQUIRED)
 find_package(Vulkan REQUIRED)
 
 set(GLSL_VALIDATOR "$ENV{VULKAN_SDK}/Bin/glslangValidator.exe")
