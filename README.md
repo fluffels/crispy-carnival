@@ -1,9 +1,10 @@
 # spicy-carnival
 
 Goals for this project:
-* implement skybox
-* manage multiple shaders in a good way
-* refactor Vulkan code a bit
+- :white_check_mark: implement skybox
+- :white_check_mark: refactor Vulkan code a bit
+- :white_check_mark: manage multiple effects in a non-OOP way
+- :black_square_button: implement good 6 degrees of freedom camera controls with momentum
 
 You'll need a cube map to put under `textures/` in the form of 6 `.png` images:
 * `nx.png`: negative x
