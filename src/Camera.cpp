@@ -12,7 +12,11 @@ using glm::vec4;
 
 #define PI 3.14159265358979323846f
 
-Camera::Camera(): rotation(1) {}
+#include "easylogging++.h"
+
+Camera::Camera(): rotation(1) {
+    qRotation = {1, 0, 0, 0};
+}
 
 MVP Camera::get() {
     MVP mvp;
@@ -23,8 +27,17 @@ MVP Camera::get() {
     mvp.view = lookAt(eye, at, up);
     mvp.rot = lookAt(vec3(0, 0, 0), normalize(at - eye), up);
     mvp.proj = perspective(fov, ar, nearz, farz);
-    mvp.model = mat4(1);
-    mvp.model = translate(mvp.model, location) * rotation;
+    // mvp.model = mat4(1);
+    // mvp.model = translate(mvp.model, location);
+
+    {
+        // float rr[16] = {0};
+        // quaternionToMatrix(qRotation, rr);
+        matrixInit(mvp.model);
+        matrixTranslate(location.x, location.y, location.z, mvp.model);
+        // mvp.model = translate(mvp.model, location) * rotation;
+    }
+
     return mvp;
 }
 
@@ -58,11 +71,13 @@ void Camera::right(float d) {
 }
 
 void Camera::rotateY(float d) {
-    rotation = rotate(rotation, PI * d * (-1/180.f), up);
+    auto rotation = quaternionRotate(0, -1, 0, PI * d * (1/180.f));
+    quaternionNormalize(rotation);
+    qRotation = quaternionMultiply(rotation, qRotation);
 }
 
 void Camera::rotateX(float d) {
-    vec3 direction = rotation * vec4(1, 0, 0, 0);
-    auto right = normalize(cross(direction, up));
-    rotation = rotate(rotation, PI * d * (-1/180.f), right);
+    auto rotation = quaternionRotate(1, 0, 0, PI * d * (1/180.f));
+    quaternionNormalize(rotation);
+    qRotation = quaternionMultiply(rotation, qRotation);
 }

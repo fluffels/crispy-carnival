@@ -3,13 +3,15 @@
 #include "glm/glm/mat4x4.hpp"
 #include "glm/glm/vec3.hpp"
 
+#include "MathLib.cpp"
+
 using glm::mat4;
 using glm::vec3;
 
 struct MVP {
     mat4 proj;
     mat4 view;
-    mat4 model;
+    float model[16];
     mat4 rot;
 };
 
@@ -23,6 +25,8 @@ struct Camera {
     vec3 velocity;
 
     mat4 rotation;
+
+    Quaternion qRotation;
 
     Camera();
 
