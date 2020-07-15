@@ -14,6 +14,8 @@ using glm::vec4;
 
 #include "easylogging++.h"
 
+#include "MathLib.cpp"
+
 Camera::Camera(): rotation(1) {
     qRotation = {1, 0, 0, 0};
 }
@@ -31,11 +33,13 @@ MVP Camera::get() {
     // mvp.model = translate(mvp.model, location);
 
     {
-        // float rr[16] = {0};
-        // quaternionToMatrix(qRotation, rr);
-        matrixInit(mvp.model);
-        matrixTranslate(location.x, location.y, location.z, mvp.model);
-        // mvp.model = translate(mvp.model, location) * rotation;
+        float rr[16] = {};
+        quaternionToMatrix(qRotation, rr);
+        matrixCopy(rr, mvp.model);
+        // float translation[16] = {};
+        // matrixInit(translation);
+        // matrixTranslate(location.x, location.y, location.z, translation);
+        // matrixMultiply(translation, rr, mvp.model);
     }
 
     return mvp;

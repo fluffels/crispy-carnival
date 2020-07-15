@@ -217,11 +217,13 @@ void recordCommandBuffers(Vulkan& vk, vector<VkCommandBuffer>& cmds) {
             &planet.mesh.vBuff.handle,
             offsets
         );
+        /*
         vkCmdDraw(
             cmd,
             planet.mesh.idxCount, 1,
             0, 0
         );
+        */
 
         vkCmdEndRenderPass(cmd);
 

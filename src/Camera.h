@@ -3,7 +3,7 @@
 #include "glm/glm/mat4x4.hpp"
 #include "glm/glm/vec3.hpp"
 
-#include "MathLib.cpp"
+#include "MathLib.h"
 
 using glm::mat4;
 using glm::vec3;

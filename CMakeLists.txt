@@ -36,7 +36,6 @@ add_executable (
     src/DirectInput.cpp
     src/FileSystem.cpp
     src/ImageDecoder.cpp
-    src/MathLib.cpp
     src/Mesh.cpp
     src/Mouse.cpp
     src/Present.cpp
