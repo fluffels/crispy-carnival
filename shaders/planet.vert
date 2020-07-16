@@ -6,6 +6,7 @@ layout(binding=0) uniform Uniform {
     mat4x4 view;
     mat4x4 model;
     mat4x4 rot;
+    vec4 quat;
 } uniforms;
 
 layout(location=0) in vec3 inPosition;

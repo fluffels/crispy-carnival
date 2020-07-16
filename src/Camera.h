@@ -13,6 +13,7 @@ struct MVP {
     mat4 view;
     float model[16];
     mat4 rot;
+    Quaternion q;
 };
 
 struct Camera {

@@ -33,9 +33,14 @@ MVP Camera::get() {
     // mvp.model = translate(mvp.model, location);
 
     {
-        float rr[16] = {};
-        quaternionToMatrix(qRotation, rr);
-        matrixCopy(rr, mvp.model);
+        // float rr[16] = {};
+        // quaternionNormalizedToMatrix(qRotation, rr);
+        // matrixCopy(rr, mvp.model);
+        LOG(INFO) << quaternionMagnitude(qRotation) << " " << qRotation.w << " " << qRotation.x << " " << qRotation.y << " " << qRotation.z;
+        mvp.q.x = qRotation.x;
+        mvp.q.y = qRotation.y;
+        mvp.q.z = qRotation.z;
+        mvp.q.w = qRotation.w;
         // float translation[16] = {};
         // matrixInit(translation);
         // matrixTranslate(location.x, location.y, location.z, translation);
@@ -76,12 +81,10 @@ void Camera::right(float d) {
 
 void Camera::rotateY(float d) {
     auto rotation = quaternionRotate(0, -1, 0, PI * d * (1/180.f));
-    quaternionNormalize(rotation);
-    qRotation = quaternionMultiply(rotation, qRotation);
+    qRotation = quaternionMultiply(qRotation, rotation);
 }
 
 void Camera::rotateX(float d) {
-    auto rotation = quaternionRotate(1, 0, 0, PI * d * (1/180.f));
-    quaternionNormalize(rotation);
-    qRotation = quaternionMultiply(rotation, qRotation);
+    auto rotation = quaternionRotate(0, 0, 1, PI * d * (1/180.f));
+    qRotation = quaternionMultiply(qRotation, rotation);
 }
