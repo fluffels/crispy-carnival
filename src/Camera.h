@@ -25,9 +25,8 @@ struct Camera {
     vec3 location;
     vec3 velocity;
 
-    mat4 rotation;
-
     Quaternion qRotation;
+    Quaternion qRotationMomentum;
 
     Camera();
 

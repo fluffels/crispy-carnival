@@ -16,14 +16,14 @@ using glm::vec4;
 
 #include "MathLib.cpp"
 
-Camera::Camera(): rotation(1) {
+Camera::Camera() {
     qRotation = {1, 0, 0, 0};
 }
 
 MVP Camera::get() {
     MVP mvp;
     at = location + vec3(0, 5, 0);
-    vec3 direction = rotation * vec4(1, 0, 0, 0);
+    vec3 direction = vec4(1, 0, 0, 0);
     vec3 offset = { direction.x * 15, direction.y * 15, direction.z * 15 };
     eye = at - offset;
     mvp.view = lookAt(eye, at, up);
