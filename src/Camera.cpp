@@ -30,12 +30,10 @@ MVP Camera::get() {
     eye = at - offset;
     mvp.spaceShipModelView = lookAt(eye, at, up);
 
-    {
-        mvp.skyboxRotation.x = rotation.x;
-        mvp.skyboxRotation.y = rotation.y;
-        mvp.skyboxRotation.z = rotation.z;
-        mvp.skyboxRotation.w = rotation.w;
-    }
+    mvp.skyboxRotation.x = rotation.x;
+    mvp.skyboxRotation.y = rotation.y;
+    mvp.skyboxRotation.z = rotation.z;
+    mvp.skyboxRotation.w = rotation.w;
 
     return mvp;
 }
