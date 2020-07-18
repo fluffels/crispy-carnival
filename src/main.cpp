@@ -30,7 +30,7 @@ const int HEIGHT = 800;
 
 const float DELTA_MOVE_PER_S = 200.f;
 const float DELTA_ROTATE_PER_S = 3.14f;
-const float MOUSE_SENSITIVITY = 0.1f;
+const float MOUSE_SENSITIVITY = 0.001f;
 const float JOYSTICK_SENSITIVITY = 100;
 
 bool keyboard[VK_OEM_CLEAR] = {};

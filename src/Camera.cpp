@@ -17,7 +17,8 @@ using glm::vec4;
 #include "MathLib.cpp"
 
 Camera::Camera() {
-    rotation = {1, 0, 0, 0};
+    rotation = {0, 0, 0, 1};
+    angularMomentum = {0, 0, 0, 1};
 }
 
 MVP Camera::get() {
@@ -52,6 +53,7 @@ MVP Camera::get() {
 
 void Camera::tick(float delta) {
     location += velocity * delta;
+    rotation = quaternionMultiply(angularMomentum, rotation);
 }
 
 void Camera::setAR(uint32_t w, uint32_t h) {
@@ -81,10 +83,10 @@ void Camera::right(float d) {
 
 void Camera::rotateY(float d) {
     auto delta = quaternionRotate(0, -1, 0, PI * d * (1/180.f));
-    rotation = quaternionMultiply(delta, rotation);
+    angularMomentum = quaternionMultiply(delta, angularMomentum);
 }
 
 void Camera::rotateX(float d) {
     auto delta = quaternionRotate(0, 0, 1, PI * d * (1/180.f));
-    rotation = quaternionMultiply(delta, rotation);
+    angularMomentum = quaternionMultiply(delta, angularMomentum);
 }
