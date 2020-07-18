@@ -17,7 +17,7 @@ using glm::vec4;
 #include "MathLib.cpp"
 
 Camera::Camera() {
-    qRotation = {1, 0, 0, 0};
+    rotation = {1, 0, 0, 0};
 }
 
 MVP Camera::get() {
@@ -34,13 +34,13 @@ MVP Camera::get() {
 
     {
         // float rr[16] = {};
-        // quaternionNormalizedToMatrix(qRotation, rr);
+        // quaternionNormalizedToMatrix(rotation, rr);
         // matrixCopy(rr, mvp.model);
-        LOG(INFO) << quaternionMagnitude(qRotation) << " " << qRotation.w << " " << qRotation.x << " " << qRotation.y << " " << qRotation.z;
-        mvp.q.x = qRotation.x;
-        mvp.q.y = qRotation.y;
-        mvp.q.z = qRotation.z;
-        mvp.q.w = qRotation.w;
+        LOG(INFO) << quaternionMagnitude(rotation) << " " << rotation.w << " " << rotation.x << " " << rotation.y << " " << rotation.z;
+        mvp.q.x = rotation.x;
+        mvp.q.y = rotation.y;
+        mvp.q.z = rotation.z;
+        mvp.q.w = rotation.w;
         // float translation[16] = {};
         // matrixInit(translation);
         // matrixTranslate(location.x, location.y, location.z, translation);
@@ -80,11 +80,11 @@ void Camera::right(float d) {
 }
 
 void Camera::rotateY(float d) {
-    auto rotation = quaternionRotate(0, -1, 0, PI * d * (1/180.f));
-    qRotation = quaternionMultiply(qRotation, rotation);
+    auto delta = quaternionRotate(0, -1, 0, PI * d * (1/180.f));
+    rotation = quaternionMultiply(delta, rotation);
 }
 
 void Camera::rotateX(float d) {
-    auto rotation = quaternionRotate(0, 0, 1, PI * d * (1/180.f));
-    qRotation = quaternionMultiply(qRotation, rotation);
+    auto delta = quaternionRotate(0, 0, 1, PI * d * (1/180.f));
+    rotation = quaternionMultiply(delta, rotation);
 }
