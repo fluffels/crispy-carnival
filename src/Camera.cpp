@@ -31,7 +31,6 @@ MVP Camera::get() {
     mvp.spaceShipModelView = lookAt(eye, at, up);
 
     {
-        LOG(INFO) << quaternionMagnitude(rotation) << " " << rotation.w << " " << rotation.x << " " << rotation.y << " " << rotation.z;
         mvp.skyboxRotation.x = rotation.x;
         mvp.skyboxRotation.y = rotation.y;
         mvp.skyboxRotation.z = rotation.z;

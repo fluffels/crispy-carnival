@@ -60,6 +60,10 @@ inline float quaternionMagnitude(Quaternion& q) {
     return result;
 }
 
+inline float quaternionLog(Quaternion& q) {
+    LOG(INFO) << quaternionMagnitude(q) << " " << q.w << " " << q.x << " " << q.y << " " << q.z;
+}
+
 inline void quaternionNormalize(Quaternion& q) {
     float magnitude = quaternionMagnitude(q);
     q.w /= magnitude;
