@@ -4,6 +4,7 @@ Goals for this project:
 - :white_check_mark: implement skybox
 - :white_check_mark: refactor Vulkan code a bit
 - :white_check_mark: manage multiple effects in a non-OOP way
+- :black_square_button: implement `#include` for shaders
 - :black_square_button: implement good 6 degrees of freedom camera controls with momentum
 
 You'll need a cube map to put under `textures/` in the form of 6 `.png` images:
