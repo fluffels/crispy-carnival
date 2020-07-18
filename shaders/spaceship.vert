@@ -3,9 +3,8 @@
 
 layout(binding=0) uniform Uniform {
     mat4x4 proj;
-    mat4x4 view;
-    mat4x4 model;
-    mat4x4 rot;
+    mat4x4 spaceShipModelView;
+    mat4x4 planetModelView;
     vec4 quat;
 } uniforms;
 
@@ -17,7 +16,7 @@ layout(location=0) out vec2 outUV;
 layout(location=1) out vec3 outNormal;
 
 void main() {
-    gl_Position = uniforms.proj * uniforms.view * vec4(inPosition, 1);
+    gl_Position = uniforms.proj * uniforms.spaceShipModelView * vec4(inPosition, 1);
     outUV = inUV;
     outNormal = inNormal;
 }

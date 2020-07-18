@@ -23,29 +23,19 @@ Camera::Camera() {
 
 MVP Camera::get() {
     MVP mvp;
+    mvp.proj = perspective(fov, ar, nearz, farz);
     at = location + vec3(0, 5, 0);
     vec3 direction = vec4(1, 0, 0, 0);
     vec3 offset = { direction.x * 15, direction.y * 15, direction.z * 15 };
     eye = at - offset;
-    mvp.view = lookAt(eye, at, up);
-    mvp.rot = lookAt(vec3(0, 0, 0), normalize(at - eye), up);
-    mvp.proj = perspective(fov, ar, nearz, farz);
-    // mvp.model = mat4(1);
-    // mvp.model = translate(mvp.model, location);
+    mvp.spaceShipModelView = lookAt(eye, at, up);
 
     {
-        // float rr[16] = {};
-        // quaternionNormalizedToMatrix(rotation, rr);
-        // matrixCopy(rr, mvp.model);
         LOG(INFO) << quaternionMagnitude(rotation) << " " << rotation.w << " " << rotation.x << " " << rotation.y << " " << rotation.z;
-        mvp.q.x = rotation.x;
-        mvp.q.y = rotation.y;
-        mvp.q.z = rotation.z;
-        mvp.q.w = rotation.w;
-        // float translation[16] = {};
-        // matrixInit(translation);
-        // matrixTranslate(location.x, location.y, location.z, translation);
-        // matrixMultiply(translation, rr, mvp.model);
+        mvp.skyboxRotation.x = rotation.x;
+        mvp.skyboxRotation.y = rotation.y;
+        mvp.skyboxRotation.z = rotation.z;
+        mvp.skyboxRotation.w = rotation.w;
     }
 
     return mvp;

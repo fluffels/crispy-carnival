@@ -10,10 +10,9 @@ using glm::vec3;
 
 struct MVP {
     mat4 proj;
-    mat4 view;
-    float model[16];
-    mat4 rot;
-    Quaternion q;
+    mat4 spaceShipModelView;
+    mat4 planetModelView;
+    Quaternion skyboxRotation;
 };
 
 struct Camera {
