@@ -71,6 +71,8 @@ void uploadVertexData(
     float* vertex = vertices;
 
     for (auto& shape: obj.shapes) {
+        // NOTE(jan): right now we assume the same material for the whole shape
+        auto materialIdx = shape.mesh.material_ids[0];
         for (auto& index: shape.mesh.indices) {
             auto vertIndex = index.vertex_index * 3;
             auto colorIndex = vertIndex;
@@ -80,11 +82,11 @@ void uploadVertexData(
             *vertex++ = obj.attrib.vertices[vertIndex + 0];
             *vertex++ = obj.attrib.vertices[vertIndex + 1];
             *vertex++ = obj.attrib.vertices[vertIndex + 2];
-            if (pipeline.needsColor &&
-                    (colorIndex < obj.attrib.colors.size())) {
-                *vertex++ = obj.attrib.colors[colorIndex + 0];
-                *vertex++ = obj.attrib.colors[colorIndex + 1];
-                *vertex++ = obj.attrib.colors[colorIndex + 2];
+            if (pipeline.needsColor && (materialIdx != -1)) {
+                auto& material = obj.materials[materialIdx];
+                *vertex++ = material.diffuse[0];
+                *vertex++ = material.diffuse[1];
+                *vertex++ = material.diffuse[2];
             }
             if (pipeline.needsTexCoords &&
                     (texIndex < obj.attrib.texcoords.size())) {
