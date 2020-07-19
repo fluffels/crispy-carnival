@@ -25,8 +25,7 @@ MVP Camera::get() {
     MVP mvp;
     mvp.proj = perspective(fov, ar, nearz, farz);
     at = location + vec3(0, 5, 0);
-    vec3 direction = vec4(1, 0, 0, 0);
-    vec3 offset = { direction.x * 15, direction.y * 15, direction.z * 15 };
+    vec3 offset = { .5f, 0, 0 };
     eye = at - offset;
     mvp.spaceShipModelView = lookAt(eye, at, up);
 
