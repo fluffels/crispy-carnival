@@ -30,6 +30,16 @@ inline void matrixCopy(float* s, float* d) {
     }
 }
 
+inline void matrixScale(float x, float y, float z, float* m) {
+    m[0] *= x;
+    m[5] *= y;
+    m[10] *= z;
+}
+
+inline void matrixScale(float s, float* m) {
+    matrixScale(s, s, s, m);
+}
+
 inline void matrixTranslate(float x, float y, float z, float* m) {
     m[12] += x;
     m[13] += y;
