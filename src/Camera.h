@@ -11,7 +11,7 @@ using glm::vec3;
 struct MVP {
     mat4 proj;
     mat4 spaceShipModelView;
-    mat4 planetModelView;
+    float planetModelView[16];
     Quaternion skyboxRotation;
 };
 
