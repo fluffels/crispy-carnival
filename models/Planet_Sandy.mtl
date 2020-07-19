@@ -1,0 +1,17 @@
+newmtl Dirt
+Kd 0.214 0.138 0.019
+
+newmtl Land
+Kd 0.214 0.138 0.019
+
+newmtl Monument_type1
+Kd 1 0.383 0.007
+
+newmtl Ocean
+Kd 0.012 0.686 0.269
+
+newmtl Peaks
+Kd 1 0.227 0.013
+
+newmtl Peaks_Lower
+Kd 0.190 0.077 0.008
