@@ -45,9 +45,6 @@ vec3 rotate_vertex_position(vec3 position)
 }
 
 void main() {
-    // vec3 P = inPosition;
-    // vec4 Q = uniforms.planetModelView * vec4(inPosition, 1);
-    // gl_Position = uniforms.proj * Q;
     vec3 P = (uniforms.planetModelView * vec4(inPosition, 1.0)).xyz;
     P = rotate_vertex_position(P);
     gl_Position = uniforms.proj * vec4(P, 1.0);
