@@ -48,4 +48,5 @@ struct Camera {
     
     void rotateY(float);
     void rotateX(float);
+    void rotateZ(float);
 };

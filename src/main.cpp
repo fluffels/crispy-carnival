@@ -198,6 +198,7 @@ WinMain(
             SetWindowText(window, buffer);
 
             float deltaMove = DELTA_MOVE_PER_S * s;
+            float deltaRotate = DELTA_ROTATE_PER_S * s;
             if (keyboard['W']) {
                 camera.forward(deltaMove);
             }
@@ -209,6 +210,12 @@ WinMain(
             }
             if (keyboard['D']) {
                 camera.right(deltaMove);
+            }
+            if (keyboard['E']) {
+                camera.rotateZ(deltaRotate);
+            }
+            if (keyboard['Q']) {
+                camera.rotateZ(-deltaRotate);
             }
             if (keyboard['F']) {
                 SetWindowPos(
