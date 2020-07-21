@@ -103,3 +103,10 @@ inline Quaternion quaternionRotate(float x, float y, float z, float angle) {
 
     return r;
 }
+
+inline Quaternion quaternionInverse(Quaternion q) {
+    q.x = -q.x;
+    q.y = -q.y;
+    q.z = -q.z;
+    q.w = -q.w;
+}
