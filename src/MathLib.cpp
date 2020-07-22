@@ -93,7 +93,7 @@ inline Quaternion quaternionMultiply(Quaternion& q1, Quaternion& q2) {
     return r;
 }
 
-inline Quaternion quaternionRotate(float x, float y, float z, float angle) {
+inline Quaternion quaternionFromAngleAxis(float x, float y, float z, float angle) {
     Quaternion r;
 
     r.w = cosf(angle/2);

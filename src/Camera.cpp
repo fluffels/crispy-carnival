@@ -72,16 +72,16 @@ void Camera::right(float d) {
 }
 
 void Camera::rotateY(float d) {
-    auto delta = quaternionRotate(0, 1, 0, PI * d * (1/180.f));
+    auto delta = quaternionFromAngleAxis(0, 1, 0, PI * d * (1/180.f));
     angularMomentum = quaternionMultiply(delta, angularMomentum);
 }
 
 void Camera::rotateX(float d) {
-    auto delta = quaternionRotate(1, 0, 0, PI * d * (1/180.f));
+    auto delta = quaternionFromAngleAxis(1, 0, 0, PI * d * (1/180.f));
     angularMomentum = quaternionMultiply(delta, angularMomentum);
 }
 
 void Camera::rotateZ(float d) {
-    auto delta = quaternionRotate(0, 0, 1, PI * d * (1/180.f));
+    auto delta = quaternionFromAngleAxis(0, 0, 1, PI * d * (1/180.f));
     angularMomentum = quaternionMultiply(delta, angularMomentum);
 }
