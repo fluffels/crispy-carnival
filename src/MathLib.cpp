@@ -105,8 +105,18 @@ inline Quaternion quaternionFromAngleAxis(float x, float y, float z, float angle
 }
 
 inline Quaternion quaternionInverse(Quaternion q) {
-    q.x = -q.x;
-    q.y = -q.y;
-    q.z = -q.z;
-    q.w = -q.w;
+    Quaternion result;
+
+    result.x = -q.x;
+    result.y = -q.y;
+    result.z = -q.z;
+    result.w = -q.w;
+
+    return result;
+}
+
+inline Quaternion quaternionRotatePoint(Quaternion q, Quaternion& p) {
+    quaternionMultiply(q, p);
+    Quaternion qi = quaternionInverse(q);
+    quaternionMultiply(p, qi);
 }
