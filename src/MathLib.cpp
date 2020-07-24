@@ -115,7 +115,7 @@ inline Quaternion quaternionInverse(Quaternion q) {
     return result;
 }
 
-inline Quaternion quaternionRotatePoint(Quaternion q, Quaternion& p) {
+inline Quaternion quaternionRotate(Quaternion q, Quaternion& p) {
     quaternionMultiply(q, p);
     Quaternion qi = quaternionInverse(q);
     quaternionMultiply(p, qi);
