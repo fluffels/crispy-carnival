@@ -67,8 +67,12 @@ void Camera::forward(float d) {
 }
 
 void Camera::right(float d) {
-    auto right = normalize(cross(direction, up));
-    velocity += right * d;
+    Quaternion dir = {};
+    dir.z = 1;
+    quaternionRotate(rotation, dir);
+    velocity.x += dir.x;
+    velocity.y += dir.y;
+    velocity.z += dir.z;
 }
 
 void Camera::rotateY(float d) {
