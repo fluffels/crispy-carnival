@@ -147,12 +147,6 @@ WinMain(
     int errorCode = 0;
 
     Camera camera;
-    camera.direction = { 1, 0, 0 };
-    camera.location = { -15, 0, 0 };
-    camera.velocity = { 0, 0, 0 };
-    camera.eye = {5, -5, -5};
-    camera.at = {0, 0, 0};
-    camera.up = {0, -1, 0};
     camera.setFOV(45);
     camera.setAR(vk.swap.extent.width, vk.swap.extent.height);
     camera.nearz = 1.f;
@@ -216,6 +210,9 @@ WinMain(
             }
             if (keyboard['Q']) {
                 camera.rotateZ(-deltaRotate);
+            }
+            if (keyboard['C']) {
+                camera.stop();
             }
             if (keyboard['F']) {
                 SetWindowPos(

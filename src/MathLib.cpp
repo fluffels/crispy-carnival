@@ -70,7 +70,7 @@ inline float quaternionMagnitude(Quaternion& q) {
     return result;
 }
 
-inline float quaternionLog(Quaternion& q) {
+inline void quaternionLog(Quaternion& q) {
     LOG(INFO) << quaternionMagnitude(q) << " " << q.w << " " << q.x << " " << q.y << " " << q.z;
 }
 
@@ -110,7 +110,7 @@ inline Quaternion quaternionInverse(Quaternion q) {
     result.x = -q.x;
     result.y = -q.y;
     result.z = -q.z;
-    result.w = -q.w;
+    result.w = q.w;
 
     return result;
 }
@@ -119,4 +119,42 @@ inline void quaternionRotate(Quaternion q, Quaternion& p) {
     Quaternion qi = quaternionInverse(q);
     p = quaternionMultiply(q, p);
     p = quaternionMultiply(p, qi);
+}
+
+inline void quaternionToMatrix(Quaternion& q, float* m) {
+    *m++ = powf(q.w, 2) + powf(q.x, 2) - powf(q.y, 2) - powf(q.z, 2);
+    *m++ = 2*q.x*q.y + 2*q.w*q.z;
+    *m++ = 2*q.x*q.z - 2*q.w*q.y;
+    *m++ = 0;
+
+    *m++ = 2*q.x*q.y - 2*q.w*q.z;
+    *m++ = powf(q.w, 2) - powf(q.x, 2) + powf(q.y, 2) - powf(q.z, 2);
+    *m++ = 2*q.y*q.z - 2*q.w*q.x;
+    *m++ = 0;
+
+    *m++ = 2*q.x*q.z + 2*q.w*q.y;
+    *m++ = 2*q.y*q.z + 2*q.w*q.x;
+    *m++ = powf(q.w, 2) - powf(q.x, 2) - powf(q.y, 2) + powf(q.z, 2);
+    *m++ = 0;
+
+    *m++ = 0;
+    *m++ = 0;
+    *m++ = 0;
+    *m++ = 1;
+}
+
+inline void getXAxis(Quaternion& q, float* v) {
+    float m[16];
+    quaternionToMatrix(q, m);
+    v[0] = m[0];
+    v[1] = m[4];
+    v[2] = m[8];
+}
+
+inline void getZAxis(Quaternion& q, float* v) {
+    float m[16];
+    quaternionToMatrix(q, m);
+    v[0] = m[2];
+    v[1] = m[6];
+    v[2] = m[10];
 }

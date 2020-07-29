@@ -18,20 +18,21 @@ using glm::vec4;
 
 Camera::Camera() {
     rotation = {0, 0, 0, 1};
-    angularMomentum = {0, 0, 0, 1};
+    location = {0, 0, 0};
+    stop();
 }
 
 MVP Camera::get() {
     MVP mvp;
     mvp.proj = perspective(fov, ar, nearz, farz);
-    at = location + vec3(0, 5, 0);
-    vec3 offset = { .5f, 0, 0 };
-    eye = at - offset;
-    mvp.spaceShipModelView = lookAt(eye, at, up);
+
+    matrixInit(mvp.spaceShipView);
+    matrixTranslate(0, 1, -5, mvp.spaceShipView);
 
     matrixInit(mvp.planetModelView);
     matrixScale(10, mvp.planetModelView);
     matrixTranslate(0, 0, -100, mvp.planetModelView);
+    matrixTranslate(-location.x, location.y, -location.z, mvp.planetModelView);
 
     mvp.skyboxRotation.x = rotation.x;
     mvp.skyboxRotation.y = rotation.y;
@@ -44,6 +45,11 @@ MVP Camera::get() {
 void Camera::tick(float delta) {
     location += velocity * delta;
     rotation = quaternionMultiply(angularMomentum, rotation);
+}
+
+void Camera::stop() {
+    angularMomentum = {0, 0, 0, 1};
+    velocity = {};
 }
 
 void Camera::setAR(uint32_t w, uint32_t h) {
@@ -63,16 +69,21 @@ void Camera::left(float d) {
 }
 
 void Camera::forward(float d) {
-    velocity += direction * d;
+    Quaternion dir = {};
+    dir.z = -1;
+    quaternionRotate(rotation, dir);
+    velocity.x += d * dir.x;
+    velocity.y += d * dir.y;
+    velocity.z += d * dir.z;
 }
 
 void Camera::right(float d) {
     Quaternion dir = {};
-    dir.z = 1;
+    dir.x = 1;
     quaternionRotate(rotation, dir);
-    velocity.x += dir.x;
-    velocity.y += dir.y;
-    velocity.z += dir.z;
+    velocity.x += d * dir.x;
+    velocity.y += d * dir.y;
+    velocity.z += d * dir.z;
 }
 
 void Camera::rotateY(float d) {

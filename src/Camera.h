@@ -10,17 +10,12 @@ using glm::vec3;
 
 struct MVP {
     mat4 proj;
-    mat4 spaceShipModelView;
+    float spaceShipView[16];
     float planetModelView[16];
     Quaternion skyboxRotation;
 };
 
 struct Camera {
-    vec3 eye;
-    vec3 at;
-    vec3 up;
-
-    vec3 direction;
     vec3 location;
     vec3 velocity;
 
@@ -37,6 +32,7 @@ struct Camera {
 
     MVP get();
     void tick(float);
+    void stop();
 
     void setAR(uint32_t, uint32_t);
     void setFOV(float);
