@@ -89,9 +89,9 @@ void Camera::right(float d) {
     Quaternion dir = {};
     dir.x = 1;
     quaternionUnrotate(rotation, dir);
-    velocity.x -= d * dir.x;
-    velocity.y -= d * dir.y;
-    velocity.z -= d * dir.z;
+    velocity.x += d * dir.x;
+    velocity.y += d * dir.y;
+    velocity.z += d * dir.z;
 }
 
 void Camera::rotateY(float d) {
