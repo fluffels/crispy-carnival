@@ -49,7 +49,7 @@ void createVertexBuffer(
 
     float* data = (float*)malloc(size);
     float* vertex = data;
-    for (uint32_t idx = 0; idx < quadCount; idx++) {
+    for (uint32_t idx = 0; idx < quadCount * VERTICES_PER_QUAD; idx++) {
         // NOTE(jan): vertex positions
         for (int i = 0; i < 3; i++) {
             *vertex++ = *((float*)buffer);
