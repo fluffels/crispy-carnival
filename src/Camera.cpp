@@ -32,7 +32,7 @@ MVP Camera::get() {
     matrixInit(mvp.planetModelView);
     matrixScale(10, mvp.planetModelView);
     matrixTranslate(0, 0, -100, mvp.planetModelView);
-    matrixTranslate(-location.x, location.y, -location.z, mvp.planetModelView);
+    matrixTranslate(-location.x, -location.y, -location.z, mvp.planetModelView);
 
     mvp.skyboxRotation.x = rotation.x;
     mvp.skyboxRotation.y = rotation.y;
@@ -44,9 +44,9 @@ MVP Camera::get() {
 
 void Camera::getDebugString(char* buffer) {
     Quaternion dir = {};
-    dir.z = -1;
-    quaternionRotate(rotation, dir);
-    sprintf_s(buffer, 1024, "(%+fi %+fj %+fk %+f) |%+f|", dir.x, dir.y, dir.z, dir.w, quaternionMagnitude(dir));
+    dir.z = 1;
+    quaternionUnrotate(rotation, dir);
+    sprintf_s(buffer, 1024, "(%+f %+f %+f) |%+f|", -dir.x, -dir.y, -dir.z, quaternionMagnitude(dir));
 }
 
 void Camera::tick(float delta) {
@@ -78,20 +78,20 @@ void Camera::left(float d) {
 
 void Camera::forward(float d) {
     Quaternion dir = {};
-    dir.z = -1;
-    quaternionRotate(rotation, dir);
-    velocity.x += d * dir.x;
-    velocity.y += d * dir.y;
-    velocity.z += d * dir.z;
+    dir.z = 1;
+    quaternionUnrotate(rotation, dir);
+    velocity.x -= d * dir.x;
+    velocity.y -= d * dir.y;
+    velocity.z -= d * dir.z;
 }
 
 void Camera::right(float d) {
     Quaternion dir = {};
     dir.x = 1;
-    quaternionRotate(rotation, dir);
-    velocity.x += d * dir.x;
-    velocity.y += d * dir.y;
-    velocity.z += d * dir.z;
+    quaternionUnrotate(rotation, dir);
+    velocity.x -= d * dir.x;
+    velocity.y -= d * dir.y;
+    velocity.z -= d * dir.z;
 }
 
 void Camera::rotateY(float d) {

@@ -121,6 +121,12 @@ inline void quaternionRotate(Quaternion q, Quaternion& p) {
     p = quaternionMultiply(p, qi);
 }
 
+inline void quaternionUnrotate(Quaternion q, Quaternion& p) {
+    Quaternion qi = quaternionInverse(q);
+    p = quaternionMultiply(qi, p);
+    p = quaternionMultiply(p, q);
+}
+
 inline void quaternionToMatrix(Quaternion& q, float* m) {
     *m++ = powf(q.w, 2) + powf(q.x, 2) - powf(q.y, 2) - powf(q.z, 2);
     *m++ = 2*q.x*q.y + 2*q.w*q.z;
