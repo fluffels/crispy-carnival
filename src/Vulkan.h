@@ -48,7 +48,9 @@ struct Vulkan {
     uint32_t queueFamily;
     VkPhysicalDeviceMemoryProperties memories;
 
+// TODO(jan): more flexible handling of multiple render passes
     VkRenderPass renderPass;
+    VkRenderPass renderPassNoClear;
     VulkanSwapChain swap;
 
     VulkanImage depth;

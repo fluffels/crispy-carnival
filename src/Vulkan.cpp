@@ -208,12 +208,12 @@ void createDevice(Vulkan& vk) {
     vkGetDeviceQueue(vk.device, vk.queueFamily, 0, &vk.queue);
 }
 
-void createRenderPass(Vulkan& vk) {
+void createRenderPass(Vulkan& vk, bool clear, VkRenderPass& renderPass) {
     vector<VkAttachmentDescription> attachments;
     VkAttachmentDescription color = {};
     color.format = vk.swap.format;
     color.samples = VK_SAMPLE_COUNT_1_BIT;
-    color.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    color.loadOp = clear? VK_ATTACHMENT_LOAD_OP_CLEAR: VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     color.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     color.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     color.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -224,7 +224,7 @@ void createRenderPass(Vulkan& vk) {
     VkAttachmentDescription depth = {};
     depth.format = VK_FORMAT_D32_SFLOAT;
     depth.samples = VK_SAMPLE_COUNT_1_BIT;
-    depth.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depth.loadOp = clear? VK_ATTACHMENT_LOAD_OP_CLEAR: VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     depth.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     depth.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     depth.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
@@ -268,7 +268,7 @@ void createRenderPass(Vulkan& vk) {
     createInfo.pDependencies = &dependency;
 
     checkSuccess(vkCreateRenderPass(
-        vk.device, &createInfo, nullptr, &vk.renderPass
+        vk.device, &createInfo, nullptr, &renderPass
     ));
 }
 
@@ -278,7 +278,8 @@ void initVK(Vulkan& vk) {
     initVKSwapChain(vk);
     vk.memories = getMemories(vk.gpu);
     createUniformBuffer(vk.device, vk.memories, vk.queueFamily, 1024, vk.mvp);
-    createRenderPass(vk);
+    createRenderPass(vk, true, vk.renderPass);
+    createRenderPass(vk, false, vk.renderPassNoClear);
     vk.depth = createVulkanDepthBuffer(
         vk.device,
         vk.memories,
