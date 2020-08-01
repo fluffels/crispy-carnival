@@ -75,31 +75,39 @@ void createDescriptorPool(
         }
     }
 
-    VkDescriptorPoolCreateInfo createInfo = {};
-    createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-    createInfo.maxSets = 1;
-    createInfo.poolSizeCount = sizes.size();
-    createInfo.pPoolSizes = sizes.data();
+    if (sizes.size() == 0) {
+        pipeline.descriptorPool = VK_NULL_HANDLE;
+    } else {
+        VkDescriptorPoolCreateInfo createInfo = {};
+        createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        createInfo.maxSets = 1;
+        createInfo.poolSizeCount = sizes.size();
+        createInfo.pPoolSizes = sizes.data();
 
-    checkSuccess(vkCreateDescriptorPool(
-        vk.device,
-        &createInfo,
-        nullptr,
-        &pipeline.descriptorPool
-    ));
+        checkSuccess(vkCreateDescriptorPool(
+            vk.device,
+            &createInfo,
+            nullptr,
+            &pipeline.descriptorPool
+        ));
+    }
 }
 
 void allocateDescriptorSet(Vulkan& vk, VulkanPipeline& pipeline) {
-    VkDescriptorSetAllocateInfo allocateInfo = {};
-    allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocateInfo.descriptorPool = pipeline.descriptorPool;
-    allocateInfo.descriptorSetCount = 1;
-    allocateInfo.pSetLayouts = &pipeline.descriptorLayout;
-    checkSuccess(vkAllocateDescriptorSets(
-        vk.device,
-        &allocateInfo,
-        &pipeline.descriptorSet
-    ));
+    if (pipeline.descriptorPool == VK_NULL_HANDLE) {
+        pipeline.descriptorSet = VK_NULL_HANDLE;
+    } else {
+        VkDescriptorSetAllocateInfo allocateInfo = {};
+        allocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        allocateInfo.descriptorPool = pipeline.descriptorPool;
+        allocateInfo.descriptorSetCount = 1;
+        allocateInfo.pSetLayouts = &pipeline.descriptorLayout;
+        checkSuccess(vkAllocateDescriptorSets(
+            vk.device,
+            &allocateInfo,
+            &pipeline.descriptorSet
+        ));
+    }
 }
 
 void createShaderModule(
