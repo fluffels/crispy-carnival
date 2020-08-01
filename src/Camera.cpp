@@ -46,11 +46,13 @@ void Camera::getDebugString(char* buffer) {
     Quaternion dir = {};
     dir.z = -1;
     quaternionRotate(rotation, dir);
+    sprintf_s(buffer, 1024, "(%+fi %+fj %+fk %+f) |%+f|", dir.x, dir.y, dir.z, dir.w, quaternionMagnitude(dir));
 }
 
 void Camera::tick(float delta) {
     location += velocity * delta;
     rotation = quaternionMultiply(angularMomentum, rotation);
+    quaternionNormalize(rotation);
 }
 
 void Camera::stop() {
@@ -95,14 +97,17 @@ void Camera::right(float d) {
 void Camera::rotateY(float d) {
     auto delta = quaternionFromAngleAxis(0, 1, 0, PI * d * (1/180.f));
     angularMomentum = quaternionMultiply(delta, angularMomentum);
+    quaternionNormalize(angularMomentum);
 }
 
 void Camera::rotateX(float d) {
     auto delta = quaternionFromAngleAxis(1, 0, 0, PI * d * (1/180.f));
     angularMomentum = quaternionMultiply(delta, angularMomentum);
+    quaternionNormalize(angularMomentum);
 }
 
 void Camera::rotateZ(float d) {
     auto delta = quaternionFromAngleAxis(0, 0, 1, PI * d * (1/180.f));
     angularMomentum = quaternionMultiply(delta, angularMomentum);
+    quaternionNormalize(angularMomentum);
 }
