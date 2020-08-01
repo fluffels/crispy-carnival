@@ -148,7 +148,8 @@ void createFramebuffers(Vulkan& vk) {
 
 void createSemaphores(Vulkan& vk) {
     vk.swap.imageReady = createSemaphore(vk.device);
-    vk.swap.presentReady = createSemaphore(vk.device);
+    vk.swap.cmdBufferDone[0] = createSemaphore(vk.device);
+    vk.swap.cmdBufferDone[1] = createSemaphore(vk.device);
 }
 
 void initVKSwapChain(Vulkan& vk) {

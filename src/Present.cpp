@@ -11,7 +11,7 @@ void updateMVP(Vulkan& vk, void* data, size_t length) {
     unMapMemory(vk.device, vk.mvp.memory);
 }
 
-void present(Vulkan& vk, vector<VkCommandBuffer>& cmds) {
+void present(Vulkan& vk, vector<vector<VkCommandBuffer>>& cmdss) {
     uint32_t imageIndex = 0;
     auto result = vkAcquireNextImageKHR(
         vk.device,
@@ -31,26 +31,31 @@ void present(Vulkan& vk, vector<VkCommandBuffer>& cmds) {
         throw std::runtime_error("could not acquire next image");
     }
 
+    vector<VkCommandBuffer> cmdBuffers;
+    for (auto& cmds: cmdss) {
+        cmdBuffers.push_back(cmds[imageIndex]);
+    }
+
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &cmds[imageIndex];
+    submitInfo.commandBufferCount = (uint32_t)cmdBuffers.size();
+    submitInfo.pCommandBuffers = cmdBuffers.data();
     submitInfo.waitSemaphoreCount = 1;
     submitInfo.pWaitSemaphores = &vk.swap.imageReady;
     VkPipelineStageFlags waitStages[] = {
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT
     };
     submitInfo.pWaitDstStageMask = waitStages;
-    submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = &vk.swap.presentReady;
+    submitInfo.signalSemaphoreCount = 2;
+    submitInfo.pSignalSemaphores = vk.swap.cmdBufferDone;
     vkQueueSubmit(vk.queue, 1, &submitInfo, nullptr);
 
     VkPresentInfoKHR presentInfo = {};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = &vk.swap.handle;
-    presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &vk.swap.presentReady;
+    presentInfo.waitSemaphoreCount = 2;
+    presentInfo.pWaitSemaphores = vk.swap.cmdBufferDone;
     presentInfo.pImageIndices = &imageIndex;
     checkSuccess(vkQueuePresentKHR(vk.queue, &presentInfo));
 }

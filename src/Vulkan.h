@@ -34,7 +34,8 @@ struct VulkanSwapChain {
     vector<VkFramebuffer> framebuffers;
     VkSurfaceKHR surface;
     VkSemaphore imageReady;
-    VkSemaphore presentReady;
+// TODO(jan): handle multiple cmd buffers more flexibly
+    VkSemaphore cmdBufferDone[2];
 };
 
 struct Vulkan {

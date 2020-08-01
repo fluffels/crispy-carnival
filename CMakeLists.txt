@@ -40,6 +40,7 @@ add_executable (
     src/Mouse.cpp
     src/Present.cpp
     src/Render.cpp
+    src/Text.cpp
     src/Texture.cpp
     src/Vertex.cpp
     src/Vulkan.cpp

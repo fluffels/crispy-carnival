@@ -6,6 +6,7 @@
 struct Mesh {
     VulkanBuffer vBuff;
     uint32_t idxCount;
+    VulkanBuffer iBuff;
 };
 
 void uploadVertexDataFromObj(

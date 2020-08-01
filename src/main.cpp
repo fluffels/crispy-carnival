@@ -15,6 +15,7 @@ INITIALIZE_EASYLOGGINGPP
 #include "DirectInput.h"
 #include "Present.h"
 #include "Render.h"
+#include "Text.h"
 #include "Vulkan.h"
 
 using std::exception;
@@ -141,8 +142,8 @@ WinMain(
     vk.swap.surface = getSurface(window, instance, vk.handle);
     initVK(vk);
 
-    vector<VkCommandBuffer> cmds;
-    recordCommandBuffers(vk, cmds);
+    vector<vector<VkCommandBuffer>> cmdss(2);
+    recordCommandBuffers(vk, cmdss[0]);
 
     int errorCode = 0;
 
@@ -176,12 +177,18 @@ WinMain(
         } while(!done && messageAvailable);
 
         if (!done) {
+            char debugString[1024];
+            camera.getDebugString(debugString);
+            LOG(INFO) << debugString;
+
+            recordTextCommandBuffers(vk, cmdss[1], debugString);
+
             LARGE_INTEGER frameStart, frameEnd;
             int64_t frameDelta;
             QueryPerformanceCounter(&frameStart);
                 auto mvp = camera.get();
                 updateMVP(vk, &mvp, sizeof(mvp));
-                present(vk, cmds);
+                present(vk, cmdss);
             QueryPerformanceCounter(&frameEnd);
             frameDelta = frameEnd.QuadPart - frameStart.QuadPart;
             float s = (float)frameDelta / counterFrequency.QuadPart;
@@ -243,6 +250,8 @@ WinMain(
                 camera.right(state.x * deltaMove);
                 camera.forward(-state.y * deltaMove);
             }
+
+            resetTextCommandBuffers(vk, cmdss[1]);
         }
     } 
 

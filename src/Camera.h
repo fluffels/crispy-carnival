@@ -31,6 +31,7 @@ struct Camera {
     float farz;
 
     MVP get();
+    void getDebugString(char* buffer);
     void tick(float);
     void stop();
 
