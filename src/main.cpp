@@ -157,6 +157,11 @@ WinMain(
     Controller* controller = directInput.controller;
     Mouse* mouse = directInput.mouse;
 
+    LARGE_INTEGER frameStart = {}, frameEnd = {};
+    int64_t frameDelta = {};
+    float fps = 0;
+    float frameTime = 0;
+
     BOOL done = false;
     while (!done) {
         MSG msg;
@@ -177,29 +182,30 @@ WinMain(
         } while(!done && messageAvailable);
 
         if (!done) {
+            char cameraDebugString[256];
+            camera.getDebugString(cameraDebugString);
+
+            char buffer[256];
+            sprintf_s(buffer, "%.2f FPS", fps);
+
             char debugString[1024];
-            camera.getDebugString(debugString);
-            LOG(INFO) << debugString;
+            snprintf(debugString, 1024, "%s\n%s", cameraDebugString, buffer);
 
             recordTextCommandBuffers(vk, cmdss[1], debugString);
 
-            LARGE_INTEGER frameStart, frameEnd;
-            int64_t frameDelta;
             QueryPerformanceCounter(&frameStart);
                 auto mvp = camera.get();
                 updateMVP(vk, &mvp, sizeof(mvp));
                 present(vk, cmdss);
             QueryPerformanceCounter(&frameEnd);
+            // SetWindowText(window, buffer);
             frameDelta = frameEnd.QuadPart - frameStart.QuadPart;
-            float s = (float)frameDelta / counterFrequency.QuadPart;
-            camera.tick(s);
-            float fps = counterFrequency.QuadPart / (float)frameDelta;
-            char buffer[255];
-            sprintf_s(buffer, "%.2f FPS", fps);
-            SetWindowText(window, buffer);
+            frameTime = (float)frameDelta / counterFrequency.QuadPart;
+            camera.tick(frameTime);
+            fps = counterFrequency.QuadPart / (float)frameDelta;
 
-            float deltaMove = DELTA_MOVE_PER_S * s;
-            float deltaRotate = DELTA_ROTATE_PER_S * s;
+            float deltaMove = DELTA_MOVE_PER_S * frameTime;
+            float deltaRotate = DELTA_ROTATE_PER_S * frameTime;
             if (keyboard['W']) {
                 camera.forward(deltaMove);
             }
@@ -241,7 +247,7 @@ WinMain(
             camera.rotateX((float)-mouseDelta.y * deltaMouseRotate);
 
             float deltaJoystickRotate =
-                DELTA_ROTATE_PER_S * s * JOYSTICK_SENSITIVITY;
+                DELTA_ROTATE_PER_S * frameTime * JOYSTICK_SENSITIVITY;
             if (controller) {
                 auto state = controller->getState();
 
