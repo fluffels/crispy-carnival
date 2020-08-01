@@ -46,7 +46,6 @@ void Camera::getDebugString(char* buffer) {
     Quaternion dir = {};
     dir.z = -1;
     quaternionRotate(rotation, dir);
-    sprintf_s(buffer, 1024, "(%fi %fj %fk %f)", dir.x, dir.y, dir.z, dir.w);
 }
 
 void Camera::tick(float delta) {
