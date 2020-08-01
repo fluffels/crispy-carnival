@@ -5,6 +5,7 @@ Goals for this project:
 - :white_check_mark: refactor Vulkan code a bit
 - :white_check_mark: manage multiple effects in a non-OOP way
 - :white_check_mark: find a good way to load .obj files
+- :black_square_button: implement text rendering
 - :black_square_button: implement `#include` for shaders
 - :black_square_button: automate link between uniform block in `Camera.h` and shaders
 - :black_square_button: implement good 6 degrees of freedom camera controls with momentum
