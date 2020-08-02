@@ -5,13 +5,13 @@ project (spicy-carnival)
 
 find_package(Vulkan REQUIRED)
 
-set(GLSL_VALIDATOR "$ENV{VULKAN_SDK}/Bin/glslangValidator.exe")
+set(GLSL_VALIDATOR "$ENV{VULKAN_SDK}/Bin/glslc.exe")
 file(GLOB_RECURSE GLSL_FILES "shaders/*.vert" "shaders/*.frag")
 foreach(GLSL_FILE ${GLSL_FILES})
     set(SPIRV_FILE "${GLSL_FILE}.spv")
     add_custom_command(
         OUTPUT ${SPIRV_FILE}
-        COMMAND ${GLSL_VALIDATOR} -V ${GLSL_FILE} -o ${SPIRV_FILE}
+        COMMAND ${GLSL_VALIDATOR} ${GLSL_FILE} -o ${SPIRV_FILE}
         DEPENDS ${GLSL_FILE}
     )
     list(APPEND SPIRV_FILES ${SPIRV_FILE})
