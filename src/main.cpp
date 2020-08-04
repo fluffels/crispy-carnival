@@ -151,7 +151,7 @@ WinMain(
     camera.setFOV(45);
     camera.setAR(vk.swap.extent.width, vk.swap.extent.height);
     camera.nearz = 1.f;
-    camera.farz = 10000.f;
+    camera.farz = 1000000.f;
 
     DirectInput directInput(instance);
     Controller* controller = directInput.controller;

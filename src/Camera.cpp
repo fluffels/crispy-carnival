@@ -30,8 +30,8 @@ MVP Camera::get() {
     matrixTranslate(0, 1, -5, mvp.spaceShipView);
 
     matrixInit(mvp.planetModelView);
-    matrixScale(10, mvp.planetModelView);
-    matrixTranslate(0, 0, -100, mvp.planetModelView);
+    matrixScale(100, mvp.planetModelView);
+    matrixTranslate(0, 0, -500, mvp.planetModelView);
     matrixTranslate(-location.x, -location.y, -location.z, mvp.planetModelView);
 
     mvp.skyboxRotation.x = rotation.x;
