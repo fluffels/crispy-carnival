@@ -4,7 +4,7 @@
 
 #include "Mesh.h"
 #include "Texture.h"
-#include "VulkanPipeline.h"
+#include "Vulkan.h"
 
 struct Brush {
     VulkanPipeline pipeline;

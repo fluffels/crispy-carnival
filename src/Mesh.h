@@ -1,7 +1,6 @@
 #pragma once
 
-#include "VulkanBuffer.h"
-#include "VulkanPipeline.h"
+#include "Vulkan.h"
 
 struct Mesh {
     VulkanBuffer vBuff;

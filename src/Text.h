@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VulkanPipeline.h"
+#include "Vulkan.h"
 
 void
 recordTextCommandBuffers(Vulkan& vk, vector<VkCommandBuffer>& cmds, char* text);
